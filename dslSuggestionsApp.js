@@ -638,6 +638,7 @@ document.addEventListener('DOMContentLoaded', function() {
 if (typeof window !== 'undefined') {
     window.updateSuggestionDisplay = updateSuggestionDisplay;
     window.regenerateAppliedSuggestions = regenerateAppliedSuggestions;
+    window.updateAppliedSuggestions = updateAppliedSuggestions;  // v3.03 - New function for radio control
     window.getSuggestions = getSuggestions;
     window.clearSuggestionInput = clearSuggestionInput;
     window.copyToClipboard = copyToClipboard;
