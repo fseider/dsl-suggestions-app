@@ -38,6 +38,7 @@ var dslSuggestionsConfigData = {
   // Rule configurations (only specify what differs from defaults)
   suggestionRules: {
     divisionOperations: {
+      enabled: true,
       description: "Detect division operations that may need zero protection",
       suggestionType: "fixable",
       suggestion: "Use ifNaN({expression}, 0.0) for Divide-By-Zero protection.",
@@ -53,6 +54,7 @@ var dslSuggestionsConfigData = {
     },
 
     queryFunctionsRule: {
+      enabled: true,
       description: "Query based functions impact performance. Should be set as One-Time / No-Copy",
       severity: "info",
       suggestionType: "advisory",
@@ -74,6 +76,7 @@ var dslSuggestionsConfigData = {
     },
 
     uniqueKeyRule: {
+      enabled: true,
       description: "uniqueKey function has special configuration requirements",
       suggestionType: "advisory",
       suggestion: "Ensure uniqueKey() expression is set to \"One-Time\" and \"No-Copy\" flags.",
@@ -81,6 +84,7 @@ var dslSuggestionsConfigData = {
     },
 
     variableNamingRule: {
+      enabled: true,
       description: "Enforce lowerCamelCase naming convention",
       severity: "info",
       suggestionType: "fixable",
@@ -94,6 +98,7 @@ var dslSuggestionsConfigData = {
     },
 
     nonOptimalNodeAccessRule: {
+      enabled: true,
       description: "Hierarchy / Library node references that can impact continuous expression performance",
       severity: "info",
       suggestionType: "advisory",
@@ -114,6 +119,7 @@ var dslSuggestionsConfigData = {
     },
 
     nullAccessProtectionRule: {
+      enabled: true,
       description: "Detect Node chains that may fail due to null/undefined values",
       suggestionType: "fixable",
       suggestion: "Add null protection using ifNull({expression}) for safe property access.",
@@ -127,6 +133,7 @@ var dslSuggestionsConfigData = {
     },
 
     mathOperationsParensRule: {
+      enabled: true,
       description: "Detect math operations that may need parentheses for clarity",
       severity: "info",
       suggestionType: "advisory",
@@ -134,6 +141,7 @@ var dslSuggestionsConfigData = {
     },
 
     extraneousBlocksRule: {
+      enabled: true,
       description: "Detect unnecessary block statements with single content",
       severity: "info",
       suggestionType: "fixable",

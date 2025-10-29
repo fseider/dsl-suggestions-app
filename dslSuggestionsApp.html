@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.01
+ * VERSION: v3.02
  * LAST UPDATED: 2025-10-29
  * 
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -21,6 +21,11 @@
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
+ *
+ * v3.02 BUG FIX:
+ * - Added explicit "enabled: true" to all 8 rules in config
+ * - Fixed rules not firing due to missing enabled property
+ * - Rules now properly inherit from defaults while maintaining explicit enabled flag
  *
  * v3.01 VERSION STRATEGY:
  * - Established simplified versioning approach
@@ -50,7 +55,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.01
+            Version: v3.02
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>
