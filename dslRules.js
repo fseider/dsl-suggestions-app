@@ -1,6 +1,6 @@
 /*
  * FILE: dslRules.js
- * VERSION: v1.00
+ * VERSION: v1.01
  * LAST UPDATED: 2025-10-29
  *
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -86,16 +86,31 @@ var DSL_RULES = [
                 return code;
             }
 
-            if (!suggestion.original || !suggestion.fixed) {
+            if (!suggestion.original) {
                 return code;
             }
+
+            // Get fixStyle (traditional or method)
+            var fixStyle = ruleConfig.fixStyle || 'traditional';
+            var template = ruleConfig.fixTemplates && ruleConfig.fixTemplates[fixStyle];
+
+            if (!template) {
+                // Fallback to traditional if template not found
+                template = 'ifNaN({expression}, {defaultAltValue})';
+            }
+
+            // Generate fixed code based on template
+            var defaultValue = ruleConfig.defaultAltValue || 0;
+            var fixedCode = template
+                .replace('{expression}', suggestion.original)
+                .replace('{defaultAltValue}', defaultValue);
 
             var originalPattern = new RegExp(
                 DSLRuleUtils.Regex.escape(suggestion.original),
                 'g'
             );
 
-            return code.replace(originalPattern, suggestion.fixed);
+            return code.replace(originalPattern, fixedCode);
         }
     },
 
