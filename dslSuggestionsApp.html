@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.06
+ * VERSION: v3.07
  * LAST UPDATED: 2025-10-29
  * 
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -21,6 +21,15 @@
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
+ *
+ * v3.07 BUG FIX (CRITICAL):
+ * - Fixed defaultAltValue hardcoded fallback in divisionOperations rule
+ * - Removed `|| 0` pattern that was converting 0.0 (double) to 0 (integer)
+ * - Config now properly controls default value (e.g., 0.0 preserved as 0.0)
+ * - Fixed config key references in dslRules.js (removed "Rule" suffixes)
+ * - All 7 affected rules (queryFunctions, uniqueKey, variableNaming, nonOptimalNodeAccess,
+ *   nullAccessProtection, mathOperationsParens, extraneousBlocks) now properly load config
+ * - This completes the v3.06 fix which updated config but not the rules file
  *
  * v3.06 BUG FIX (MAJOR):
  * - Fixed config key mismatch affecting 7 out of 8 rules
@@ -86,7 +95,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.06
+            Version: v3.07
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>

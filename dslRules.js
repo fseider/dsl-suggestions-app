@@ -100,7 +100,7 @@ var DSL_RULES = [
             }
 
             // Generate fixed code based on template
-            var defaultValue = ruleConfig.defaultAltValue || 0;
+            var defaultValue = ruleConfig.defaultAltValue;
             var fixedCode = template
                 .replace('{expression}', suggestion.original)
                 .replace('{defaultAltValue}', defaultValue);
@@ -126,7 +126,7 @@ var DSL_RULES = [
                 return suggestions;
             }
 
-            var ruleConfig = config.suggestionRules.queryFunctionsRule;
+            var ruleConfig = config.suggestionRules.queryFunctions;
 
             if (!ruleConfig || !ruleConfig.enabled) {
                 return suggestions;
@@ -183,7 +183,7 @@ var DSL_RULES = [
                 return suggestions;
             }
 
-            var ruleConfig = config.suggestionRules.uniqueKeyRule;
+            var ruleConfig = config.suggestionRules.uniqueKey;
 
             if (!ruleConfig || !ruleConfig.enabled) {
                 return suggestions;
@@ -242,7 +242,7 @@ var DSL_RULES = [
                 return suggestions;
             }
 
-            var ruleConfig = config.suggestionRules.variableNamingRule;
+            var ruleConfig = config.suggestionRules.variableNaming;
 
             if (!ruleConfig || !ruleConfig.enabled) {
                 return suggestions;
@@ -295,7 +295,7 @@ var DSL_RULES = [
         },
 
         fix: function(code, suggestion, config) {
-            var ruleConfig = config.suggestionRules.variableNamingRule;
+            var ruleConfig = config.suggestionRules.variableNaming;
 
             if (!ruleConfig || !ruleConfig.autoFixEnabled) {
                 return code;
@@ -326,7 +326,7 @@ var DSL_RULES = [
                 return suggestions;
             }
 
-            var ruleConfig = config.suggestionRules.nonOptimalNodeAccessRule;
+            var ruleConfig = config.suggestionRules.nonOptimalNodeAccess;
 
             if (!ruleConfig || !ruleConfig.enabled) {
                 return suggestions;
@@ -398,7 +398,7 @@ var DSL_RULES = [
                 return suggestions;
             }
 
-            var ruleConfig = config.suggestionRules.nullAccessProtectionRule;
+            var ruleConfig = config.suggestionRules.nullAccessProtection;
 
             if (!ruleConfig || !ruleConfig.enabled) {
                 return suggestions;
@@ -463,7 +463,7 @@ var DSL_RULES = [
         },
 
         fix: function(code, suggestion, config) {
-            var ruleConfig = config.suggestionRules.nullAccessProtectionRule;
+            var ruleConfig = config.suggestionRules.nullAccessProtection;
 
             if (!ruleConfig || !ruleConfig.autoFixEnabled) {
                 return code;
@@ -494,7 +494,7 @@ var DSL_RULES = [
                 return suggestions;
             }
 
-            var ruleConfig = config.suggestionRules.mathOperationsParensRule;
+            var ruleConfig = config.suggestionRules.mathOperationsParens;
 
             if (!ruleConfig || !ruleConfig.enabled) {
                 return suggestions;
@@ -544,7 +544,7 @@ var DSL_RULES = [
         },
 
         fix: function(code, suggestion, config) {
-            var ruleConfig = config.suggestionRules.mathOperationsParensRule;
+            var ruleConfig = config.suggestionRules.mathOperationsParens;
 
             if (!ruleConfig || !ruleConfig.autoFixEnabled) {
                 return code;
@@ -575,7 +575,7 @@ var DSL_RULES = [
                 return suggestions;
             }
 
-            var ruleConfig = config.suggestionRules.extraneousBlocksRule;
+            var ruleConfig = config.suggestionRules.extraneousBlocks;
 
             if (!ruleConfig || !ruleConfig.enabled) {
                 return suggestions;
