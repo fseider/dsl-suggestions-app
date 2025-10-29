@@ -53,7 +53,7 @@ var dslSuggestionsConfigData = {
       defaultAltValue: 0.0
     },
 
-    queryFunctionsRule: {
+    queryFunctions: {
       enabled: true,
       description: "Query based functions impact performance. Should be set as One-Time / No-Copy",
       severity: "info",
@@ -75,7 +75,7 @@ var dslSuggestionsConfigData = {
       ]
     },
 
-    uniqueKeyRule: {
+    uniqueKey: {
       enabled: true,
       description: "uniqueKey function has special configuration requirements",
       suggestionType: "advisory",
@@ -83,7 +83,7 @@ var dslSuggestionsConfigData = {
       function: "uniqueKey"
     },
 
-    variableNamingRule: {
+    variableNaming: {
       enabled: true,
       description: "Enforce lowerCamelCase naming convention",
       severity: "info",
@@ -97,7 +97,7 @@ var dslSuggestionsConfigData = {
       separatorCharacters: ["_", "-"]
     },
 
-    nonOptimalNodeAccessRule: {
+    nonOptimalNodeAccess: {
       enabled: true,
       description: "Hierarchy / Library node references that can impact continuous expression performance",
       severity: "info",
@@ -118,7 +118,7 @@ var dslSuggestionsConfigData = {
       ]
     },
 
-    nullAccessProtectionRule: {
+    nullAccessProtection: {
       enabled: true,
       description: "Detect Node chains that may fail due to null/undefined values",
       suggestionType: "fixable",
@@ -132,7 +132,7 @@ var dslSuggestionsConfigData = {
       defaultAltValue: "ref, string, etc."
     },
 
-    mathOperationsParensRule: {
+    mathOperationsParens: {
       enabled: true,
       description: "Detect math operations that may need parentheses for clarity",
       severity: "info",
@@ -140,7 +140,7 @@ var dslSuggestionsConfigData = {
       suggestion: "Consider use of parens () to group math operations for clarity."
     },
 
-    extraneousBlocksRule: {
+    extraneousBlocks: {
       enabled: true,
       description: "Detect unnecessary block statements with single content",
       severity: "info",
@@ -150,6 +150,6 @@ var dslSuggestionsConfigData = {
     }
   },
 
-  // Global library configuration (used by nonOptimalNodeAccessRule)
+  // Global library configuration (used by nonOptimalNodeAccess)
   libraries: ["Primary", "Secondary", "Tertiary"]
 };
