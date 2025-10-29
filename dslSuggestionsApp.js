@@ -38,6 +38,9 @@ function dslSuggestionsAppVersion() {
 // v2.09 - Store original suggestions for filtering
 var originalSuggestions = '';
 
+// v3.03 - Store original input code for reapplying with different forms
+var originalInputCode = '';
+
 // v2.13 - Store last valid checkbox state
 var lastCheckboxState = {
     traditional: true,
@@ -257,49 +260,111 @@ function handleScriptError(scriptName) {
 // Main function to get suggestions and populate outputs
 function getSuggestions() {
     var code = document.getElementById('suggestionInput').value;
-    
+
     if (!code.trim()) {
         alert('Please enter some code to analyze.');
         return;
     }
-    
-    // v2.09 - Reset original suggestions when getting new ones
-    originalSuggestions = '';
-    
+
+    // v3.03 - Store original input code for reapplying with different forms
+    originalInputCode = code;
+
     try {
-        // Generate suggestions using the engine
+        // Generate suggestions showing BOTH forms
         if (typeof generateCodeSuggestions === 'function') {
-            var suggestions = generateCodeSuggestions(code);
-            // v2.07: Use helper function for div/textarea compatibility
+            var suggestions = generateSuggestionsWithBothForms(code);
             setElementContent('suggestionOutput', suggestions);
-            
-            // v2.09 - Store original suggestions
-            originalSuggestions = suggestions;
-            
-            // v2.09 - Apply form filtering if needed
-            updateSuggestionDisplay();
         } else {
-            // v2.07: Use helper function for div/textarea compatibility
             setElementContent('suggestionOutput', 'Suggestions functionality not loaded.');
         }
-        
-        // Apply auto-fixes 
-        // v2.08 - Simplified to just display whatever the engine returns
-        if (typeof applyCodeSuggestions === 'function') {
-            var appliedSuggestions = applyCodeSuggestions(code);
-            
-            // v2.08 - Just display whatever the engine returns - no interference
-            setElementContent('suggestionsApplied', appliedSuggestions);
-            
-        } else {
-            // v2.07: Use helper function for div/textarea compatibility
-            setElementContent('suggestionsApplied', 'Auto-apply functionality not loaded.');
-        }
-        
+
+        // Generate applied suggestions with selected form
+        updateAppliedSuggestions();
+
     } catch (error) {
         console.error('Error in getSuggestions:', error);
         alert('Error generating suggestions: ' + error.message);
     }
+}
+
+// v3.03 - Generate suggestions showing both Traditional and Method forms
+function generateSuggestionsWithBothForms(code) {
+    if (!code || typeof analyzeDSL !== 'function') {
+        return 'Analysis functionality not loaded.';
+    }
+
+    // Get raw analysis results
+    var analysis = analyzeDSL(code);
+    if (!analysis || !analysis.suggestions || analysis.suggestions.length === 0) {
+        return 'No suggestions found. Code looks good!';
+    }
+
+    // Build output showing both forms
+    var lines = code.split('\n');
+    var result = [];
+
+    for (var i = 0; i < lines.length; i++) {
+        result.push(lines[i]);
+
+        // Find suggestions for this line
+        var lineSuggestions = analysis.suggestions.filter(function(s) {
+            return s.line === i + 1;
+        });
+
+        // For each suggestion, show both Traditional and Method forms
+        for (var j = 0; j < lineSuggestions.length; j++) {
+            var suggestion = lineSuggestions[j];
+            var indent = getIndent(lines[i]);
+
+            // Show Traditional form
+            result.push(indent + '/* SUGGESTION (Traditional): ' + suggestion.message + ' */');
+
+            // Show Method form
+            result.push(indent + '/* SUGGESTION (Method): ' + suggestion.message + ' */');
+        }
+    }
+
+    return result.join('\n');
+}
+
+// v3.03 - Update applied suggestions based on selected form
+function updateAppliedSuggestions() {
+    if (!originalInputCode) {
+        return;
+    }
+
+    try {
+        // Get selected form
+        var traditionalRadio = document.getElementById('showTraditionalForm');
+        var selectedForm = (traditionalRadio && traditionalRadio.checked) ? 'traditional' : 'method';
+
+        // Set form selection for engine to use
+        if (typeof window !== 'undefined') {
+            window.__forceFormSelection = selectedForm;
+        }
+
+        // Apply auto-fixes with selected form
+        if (typeof applyCodeSuggestions === 'function') {
+            var appliedSuggestions = applyCodeSuggestions(originalInputCode);
+            setElementContent('suggestionsApplied', appliedSuggestions);
+        } else {
+            setElementContent('suggestionsApplied', 'Auto-apply functionality not loaded.');
+        }
+
+        // Clear form selection override
+        if (typeof window !== 'undefined') {
+            delete window.__forceFormSelection;
+        }
+
+    } catch (error) {
+        console.error('Error updating applied suggestions:', error);
+    }
+}
+
+// Helper function to get line indentation
+function getIndent(line) {
+    var match = line.match(/^(\s*)/);
+    return match ? match[1] : '';
 }
 
 // Debug function to test extraneousBlock detection specifically
