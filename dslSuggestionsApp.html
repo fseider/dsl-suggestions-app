@@ -16,14 +16,15 @@
  * Simple interface with input/output textareas and suggestion controls.
  * Self-contained suggestions app separate from main application.
  * 
- * v3.00 SIMPLIFICATIONS:
- * - Removed version popup system entirely (dslVersionPopup.js no longer loaded)
- * - Removed popup overlay HTML structure
- * - Removed all popup-related styles
- * - Removed Show Versions button
- * - Simplified version display to single line
- * - Removed 686 lines of popup-related code (~27 KB)
- * - Cleaner, more focused interface
+ * v3.00 OPTIMIZATIONS:
+ * - ARCHITECTURE: Consolidated 8 rule files → 1 file (dslRules.js)
+ * - ARCHITECTURE: Trimmed utilities from 440 → 120 lines
+ * - ARCHITECTURE: Simplified config with common defaults
+ * - ARCHITECTURE: Removed dynamic loader (~700 lines)
+ * - ARCHITECTURE: Removed registry file (no longer needed)
+ * - PERFORMANCE: 4 HTTP requests instead of 10+
+ * - PERFORMANCE: Faster page load and initialization
+ * - MAINTENANCE: Simpler codebase, easier debugging
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -76,15 +77,14 @@
         </div>
     </div>
 
-    <!-- 
-    ⚠️ IMPORTANT ARCHITECTURAL RULES:
-    - HTML files should ONLY load ENGINE files (dslSuggestionsEngine.js)
-    - NEVER directly load config files (dslSuggestionsConfig.js)
-    - Engines handle loading their respective config files automatically
-    - All JavaScript logic must be placed in the corresponding .js file, NOT in HTML
-    - Access config data through engine-provided objects (dslSuggestionsConfigData)
+    <!--
+    ⚠️ OPTIMIZED ARCHITECTURE v3.00:
+    - HTML files only load ENGINE (dslSuggestionsEngine.js) and APP (dslSuggestionsApp.js)
+    - Engine auto-loads: Config, Utilities, and Consolidated Rules (3 files total)
+    - No more dynamic loading, registry, or individual rule files
+    - Faster page load: 4 HTTP requests instead of 10+
     -->
-    
+
     <script src="dslSuggestionsEngine.js" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
     <script src="dslSuggestionsApp.js"></script>
 
