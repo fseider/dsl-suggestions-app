@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.00
+ * VERSION: v3.01
  * LAST UPDATED: 2025-10-29
  * 
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -16,6 +16,17 @@
  * Simple interface with input/output textareas and suggestion controls.
  * Self-contained suggestions app separate from main application.
  * 
+ * VERSION TRACKING STRATEGY:
+ * - This file (dslSuggestionsApp.html) is the MASTER version for the entire app
+ * - Any change to ANY file bumps this version
+ * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
+ * - All other files reference this master version
+ *
+ * v3.01 VERSION STRATEGY:
+ * - Established simplified versioning approach
+ * - Removed version headers from config and utility files
+ * - Kept versions only in App HTML, Engine, and Rules
+ *
  * v3.00 OPTIMIZATIONS:
  * - ARCHITECTURE: Consolidated 8 rule files → 1 file (dslRules.js)
  * - ARCHITECTURE: Trimmed utilities from 440 → 120 lines
@@ -39,7 +50,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.00
+            Version: v3.01
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>

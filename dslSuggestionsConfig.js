@@ -1,7 +1,5 @@
 /*
  * FILE: dslSuggestionsConfig.js
- * VERSION: v3.00
- * LAST UPDATED: 2025-10-29
  *
  * ARTIFACT INFO (for proper Claude artifact creation):
  * - ID: dslSuggestionsConfig.js
@@ -15,12 +13,7 @@
  * DESCRIPTION:
  * Configuration data for DSL suggestions engine including rule definitions,
  * patterns, and fix strategies for code analysis and improvement.
- *
- * OPTIMIZATION v3.00:
- * - Extracted common defaults to reduce duplication
- * - Simplified structure (less nesting where possible)
- * - Rules now inherit defaults and only specify overrides
- * - Reduced configuration verbosity by ~30%
+ * Version tracking: See dslSuggestionsApp.html for app version.
  */
 
 var dslSuggestionsConfigData = {
