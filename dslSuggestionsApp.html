@@ -22,7 +22,7 @@
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
  *
- * v3.23 CHANGE - DEFAULT_VALUE PLACEHOLDER:
+ * v3.23 CHANGE - DEFAULT_VALUE PLACEHOLDER + CACHE BUSTING:
  * - Changed from smart default detection to static DEFAULT_VALUE placeholder
  * - Autofix now uses literal "DEFAULT_VALUE" text instead of type-specific defaults
  * - User must manually replace DEFAULT_VALUE with appropriate value
@@ -31,7 +31,9 @@
  *   - Method: (xxDefQuote.imageList).ifNull(DEFAULT_VALUE)
  * - Clearer indicator that user needs to provide the actual default value
  * - Smart detection logic (_getSmartDefaultValue) remains in code but unused
+ * - Added cache-busting query parameters (?v=3.23) to script tags to force reload
  * - Changes: Updated fix() to use 'DEFAULT_VALUE' instead of smart detection
+ * - Changes: Added version query params to dslSuggestionsEngine.js and dslSuggestionsApp.js
  *
  * v3.22 FEATURE - SMART DEFAULT VALUES:
  * - Implemented smart default value detection for ifNull() autofix
@@ -321,8 +323,8 @@
     - Faster page load: 4 HTTP requests instead of 10+
     -->
 
-    <script src="dslSuggestionsEngine.js" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
-    <script src="dslSuggestionsApp.js"></script>
+    <script src="dslSuggestionsEngine.js?v=3.23" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
+    <script src="dslSuggestionsApp.js?v=3.23"></script>
 
     <style>
         /* v3.00 - Simplified styles, removed all popup-related CSS */
