@@ -336,7 +336,7 @@ function generateSuggestionsWithBothForms(code) {
     return result.join('\n');
 }
 
-// v3.18 - Generate suggestions with HTML color coding
+// v3.19 - Generate suggestions with HTML color coding and distinct colors per rule instance
 function generateSuggestionsWithColorCoding(code) {
     if (!code || typeof analyzeDSL !== 'function') {
         return 'Analysis functionality not loaded.';
@@ -360,10 +360,13 @@ function generateSuggestionsWithColorCoding(code) {
         return text.replace(/[&<>"']/g, function(m) { return map[m]; });
     }
 
-    // Helper function to convert **text** to colored spans
-    function highlightObjects(text) {
-        return text.replace(/\*\*([^*]+)\*\*/g, '<span class="highlight-object">$1</span>');
+    // Helper function to convert **text** to colored spans with specific color
+    function highlightObjects(text, colorIndex) {
+        return text.replace(/\*\*([^*]+)\*\*/g, '<span class="highlight-object-' + colorIndex + '">$1</span>');
     }
+
+    // Track rule instance counts for color cycling
+    var ruleInstanceCount = {};
 
     // Build output showing both forms with color coding
     var lines = code.split('\n');
@@ -383,10 +386,20 @@ function generateSuggestionsWithColorCoding(code) {
             var suggestion = lineSuggestions[j];
             var indent = getIndent(lines[i]);
             var label = suggestion.label || suggestion.rule || 'General';
+            var ruleName = suggestion.rule || 'unknown';
+
+            // Track instance count for this rule
+            if (!ruleInstanceCount[ruleName]) {
+                ruleInstanceCount[ruleName] = 0;
+            }
+            ruleInstanceCount[ruleName]++;
+
+            // Calculate color index (cycle through 6 colors: 1-6)
+            var colorIndex = ((ruleInstanceCount[ruleName] - 1) % 6) + 1;
 
             // Escape HTML but preserve ** markers for highlighting
             var message = escapeHtml(suggestion.message);
-            message = highlightObjects(message);
+            message = highlightObjects(message, colorIndex);
 
             if (suggestion.fixable && suggestion.hasDifferentForms) {
                 // Fixable rules with different Traditional/Method forms

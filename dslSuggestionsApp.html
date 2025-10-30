@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.18
+ * VERSION: v3.19
  * LAST UPDATED: 2025-10-30
  * 
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -21,6 +21,16 @@
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
+ *
+ * v3.19 UX IMPROVEMENT - COLOR CYCLING:
+ * - Each instance of the same rule now gets a distinct color in HTML output
+ * - Color palette: Red, Blue, Green, Orange, Purple, Pink (6 colors)
+ * - Colors cycle through palette for multiple instances of same rule
+ * - Different rules can reuse the same color palette
+ * - Example: First nullAccessProtection = Red, Second = Blue, Third = Green, etc.
+ * - Helps distinguish between multiple instances of same rule type
+ * - Changes: Added 6 CSS color classes (highlight-object-1 through 6)
+ * - Updated generateSuggestionsWithColorCoding to track rule instance counts
  *
  * v3.18 UX IMPROVEMENT - DUAL OUTPUT:
  * - Added second output box showing HTML version with color coding
@@ -213,7 +223,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.18
+            Version: v3.19
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>
@@ -293,8 +303,33 @@
             line-height: 1.6;
         }
 
-        .html-output .highlight-object {
+        .html-output .highlight-object-1 {
             color: #d32f2f;
+            font-weight: bold;
+        }
+
+        .html-output .highlight-object-2 {
+            color: #1976d2;
+            font-weight: bold;
+        }
+
+        .html-output .highlight-object-3 {
+            color: #388e3c;
+            font-weight: bold;
+        }
+
+        .html-output .highlight-object-4 {
+            color: #f57c00;
+            font-weight: bold;
+        }
+
+        .html-output .highlight-object-5 {
+            color: #7b1fa2;
+            font-weight: bold;
+        }
+
+        .html-output .highlight-object-6 {
+            color: #c2185b;
             font-weight: bold;
         }
 
