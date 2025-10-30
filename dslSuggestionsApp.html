@@ -1,7 +1,7 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.07
- * LAST UPDATED: 2025-10-29
+ * VERSION: v3.08
+ * LAST UPDATED: 2025-10-30
  * 
  * ARTIFACT INFO (for proper Claude artifact creation):
  * - ID: dslSuggestionsApp.html
@@ -21,6 +21,15 @@
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
+ *
+ * v3.08 BUG FIX (CRITICAL):
+ * - Implemented missing skipIfWrappedIn logic in divisionOperations rule
+ * - Rule now properly skips divisions already wrapped in ifNaN, catch, ifNull, or safeDivide
+ * - Fixes double-wrapping bug: (revenue / quantity).ifNaN(0.0) → ((revenue / quantity).ifNaN(0)).ifNaN(0.0)
+ * - Added _isAlreadyWrapped helper function that checks both traditional and method forms
+ * - Traditional check: ifNaN(x / y, 0)
+ * - Method check: (x / y).ifNaN(0)
+ * - Config skipIfWrappedIn setting now functional
  *
  * v3.07 BUG FIX (CRITICAL):
  * - Fixed defaultAltValue hardcoded fallback in divisionOperations rule
@@ -95,7 +104,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.07
+            Version: v3.08
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>
