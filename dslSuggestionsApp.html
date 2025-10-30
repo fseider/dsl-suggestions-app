@@ -1,26 +1,35 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.26
+ * VERSION: v3.27
  * LAST UPDATED: 2025-10-30
- * 
+ *
  * ARTIFACT INFO (for proper Claude artifact creation):
  * - ID: dslSuggestionsApp.html
  * - Title: dslSuggestionsApp
  * - Type: text/html
- * 
+ *
  * ARCHITECTURAL BOUNDARY: Suggestions
  * LOADS: dslSuggestionsEngine.js, dslSuggestionsApp.js
- * 
+ *
  * DESCRIPTION:
  * Standalone DSL Suggestions application providing code analysis and suggestion functionality.
  * Simple interface with input/output textareas and suggestion controls.
  * Self-contained suggestions app separate from main application.
- * 
+ *
  * VERSION TRACKING STRATEGY:
  * - This file (dslSuggestionsApp.html) is the MASTER version for the entire app
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
+ *
+ * v3.27 FIX - RESTORE DUAL FORM DISPLAY (TRADITIONAL AND METHOD):
+ * - Added hasDifferentForms back to all 4 rules with fixTemplates
+ * - Set fixable: true for display purposes (shows both Traditional and Method forms)
+ * - Advisory mode (autoFixEnabled: false) remains active - no auto-apply
+ * - Rules updated: divisionOperations, variableNaming, nullAccessProtection, extraneousBlocks
+ * - UI now displays both forms even in advisory-only mode
+ * - Users can see both Traditional (ifNaN(x, y)) and Method ((x).ifNaN(y)) options
+ * - Cache-busting updated to v=3.27
  *
  * v3.26 MAJOR CHANGE - ADVISORY-ONLY MODE & IMPROVED DIVISION DETECTION:
  * - Disabled autofix for ALL rules (all rules now advisory-only, suggestions without auto-apply)
@@ -323,7 +332,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.26
+            Version: v3.27
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>

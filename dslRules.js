@@ -91,6 +91,10 @@ var DSL_RULES = [
                 // Increment instance counter
                 this._instanceCounter++;
 
+                // Check if this rule has different forms (Traditional vs Method)
+                var hasDifferentForms = ruleConfig.fixTemplates &&
+                                       ruleConfig.fixTemplates.traditional !== ruleConfig.fixTemplates.method;
+
                 suggestions.push({
                     line: lineNumber,
                     column: divPosition,
@@ -98,7 +102,8 @@ var DSL_RULES = [
                     severity: ruleConfig.severity || 'warning',
                     rule: this.name,
                     label: ruleConfig.label || this.name,
-                    fixable: ruleConfig.autoFixEnabled || false,
+                    fixable: true,  // Show as fixable for display purposes (shows both forms)
+                    hasDifferentForms: hasDifferentForms,
                     original: expression,
                     instanceNumber: this._instanceCounter
                 });
@@ -417,6 +422,10 @@ var DSL_RULES = [
                         correctedName: camelCaseName
                     });
 
+                    // Check if this rule has different forms (Traditional vs Method)
+                    var hasDifferentForms = ruleConfig.fixTemplates &&
+                                           ruleConfig.fixTemplates.traditional !== ruleConfig.fixTemplates.method;
+
                     suggestions.push({
                         line: lineNumber,
                         column: position,
@@ -424,7 +433,8 @@ var DSL_RULES = [
                         severity: ruleConfig.severity || 'info',
                         rule: this.name,
                         label: ruleConfig.label || this.name,
-                        fixable: ruleConfig.autoFixEnabled || false,
+                        fixable: true,  // Show as fixable for display purposes (shows both forms)
+                        hasDifferentForms: hasDifferentForms,
                         original: varName
                     });
                 }
@@ -588,6 +598,10 @@ var DSL_RULES = [
                     // Increment instance counter for this suggestion
                     this._instanceCounter++;
 
+                    // Check if this rule has different forms (Traditional vs Method)
+                    var hasDifferentForms = ruleConfig.fixTemplates &&
+                                           ruleConfig.fixTemplates.traditional !== ruleConfig.fixTemplates.method;
+
                     suggestions.push({
                         line: lineNumber,
                         column: position,
@@ -595,7 +609,8 @@ var DSL_RULES = [
                         severity: ruleConfig.severity || 'warning',
                         rule: this.name,
                         label: ruleConfig.label || this.name,
-                        fixable: ruleConfig.autoFixEnabled || false,
+                        fixable: true,  // Show as fixable for display purposes (shows both forms)
+                        hasDifferentForms: hasDifferentForms,
                         original: expression,
                         instanceNumber: this._instanceCounter
                     });
@@ -840,6 +855,10 @@ var DSL_RULES = [
                     var suggestionMsg = ruleConfig.suggestion ||
                         'Unnecessary block detected. Single statement does not require braces.';
 
+                    // Check if this rule has different forms (Traditional vs Method)
+                    var hasDifferentForms = ruleConfig.fixTemplates &&
+                                           ruleConfig.fixTemplates.traditional !== ruleConfig.fixTemplates.method;
+
                     suggestions.push({
                         line: lineNumber,
                         column: 0,
@@ -847,13 +866,18 @@ var DSL_RULES = [
                         severity: ruleConfig.severity || 'info',
                         rule: this.name,
                         label: ruleConfig.label || this.name,
-                        fixable: ruleConfig.autoFixEnabled || false
+                        fixable: true,  // Show as fixable for display purposes (shows both forms)
+                        hasDifferentForms: hasDifferentForms
                     });
                 }
             }
 
             if (trimmedLine === '{}' || (trimmedLine === '{' && lineNumber < allLines.length && allLines[lineNumber].trim() === '}')) {
                 var suggestionMsg = ruleConfig.suggestion || 'Empty block detected. Consider removing or adding implementation.';
+
+                // Check if this rule has different forms (Traditional vs Method)
+                var hasDifferentForms = ruleConfig.fixTemplates &&
+                                       ruleConfig.fixTemplates.traditional !== ruleConfig.fixTemplates.method;
 
                 suggestions.push({
                     line: lineNumber,
@@ -862,7 +886,8 @@ var DSL_RULES = [
                     severity: ruleConfig.severity || 'warning',
                     rule: this.name,
                     label: ruleConfig.label || this.name,
-                    fixable: ruleConfig.autoFixEnabled || false
+                    fixable: true,  // Show as fixable for display purposes (shows both forms)
+                    hasDifferentForms: hasDifferentForms
                 });
             }
 
