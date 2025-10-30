@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.10
+ * VERSION: v3.11
  * LAST UPDATED: 2025-10-30
  * 
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -21,6 +21,15 @@
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
+ *
+ * v3.11 BUG FIX (CRITICAL):
+ * - Fixed JavaScript number-to-string conversion losing .0 precision
+ * - Issue: Applied code showed ifNaN(x, 0) instead of ifNaN(x, 0.0)
+ * - Root cause: Config had defaultAltValue: 0.0 (number), JavaScript converts to "0" in string concat
+ * - JavaScript behavior: "test " + 0.0 results in "test 0", not "test 0.0"
+ * - Solution: Changed defaultAltValue from 0.0 (number) to "0.0" (string) in config
+ * - Applied suggestions now correctly show: ifNaN(revenue / quantity, 0.0)
+ * - Preserves double precision indicator for DSL code standards
  *
  * v3.10 BUG FIX (CRITICAL):
  * - Fixed {expression} placeholder not being replaced in suggestion messages
@@ -122,7 +131,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.10
+            Version: v3.11
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>

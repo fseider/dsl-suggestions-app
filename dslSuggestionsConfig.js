@@ -50,7 +50,7 @@ var dslSuggestionsConfigData = {
       skipIfWrappedIn: ["ifNaN", "catch", "ifNull", "safeDivide"],
       errorOnZeroLiteral: true,
       errorMessage: "ERROR: Division by zero literal! {expression}",
-      defaultAltValue: 0.0
+      defaultAltValue: "0.0"
     },
 
     queryFunctions: {
