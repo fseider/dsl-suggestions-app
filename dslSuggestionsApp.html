@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.16
+ * VERSION: v3.17
  * LAST UPDATED: 2025-10-30
  * 
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -21,6 +21,17 @@
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
+ *
+ * v3.17 RULE REFINEMENT:
+ * - Refined nullAccessProtection rule to distinguish property access from function calls
+ * - Issue: Rule was flagging function calls like imageList.add( as null concerns
+ * - Added logic to skip function calls by checking if property is followed by opening parenthesis
+ * - Function calls like object.method( are now skipped (not a null concern)
+ * - Property access like object.property still flagged (null concern remains)
+ * - Enhanced suggestion message to highlight object at risk using **bold** markers
+ * - Example: "Add null protection for **xxDefQuote** when accessing .imageList"
+ * - Users can now see exactly which object could be null in the access chain
+ * - Result: More accurate null safety suggestions focused on actual property access risks
  *
  * v3.16 UX IMPROVEMENT:
  * - Updated labels to shorter, more concise versions per user request
@@ -192,7 +203,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.16
+            Version: v3.17
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>

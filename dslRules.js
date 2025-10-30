@@ -532,6 +532,13 @@ var DSL_RULES = [
                     continue;
                 }
 
+                // Skip if this is a function call (property followed by opening parenthesis)
+                var matchEnd = position + match[0].length;
+                var nextChar = lineWithoutStrings.charAt(matchEnd);
+                if (nextChar === '(') {
+                    continue; // This is a function call, not a property access concern
+                }
+
                 var hasOptionalChaining = lineWithoutStrings.indexOf(object + '?.') !== -1;
                 var hasNullCheck = this._hasNullCheck(lineWithoutStrings, object);
 

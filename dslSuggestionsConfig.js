@@ -128,7 +128,7 @@ var dslSuggestionsConfigData = {
       label: "Null Safety",
       description: "Detect Node chains that may fail due to null/undefined values",
       suggestionType: "fixable",
-      suggestion: "Add null protection using ifNull({expression}) for safe property access.",
+      suggestion: "Add null protection for **{object}** when accessing .{property}",
       autoFixEnabled: true,
       fixStyle: "method",
       fixTemplates: {
