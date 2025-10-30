@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.24
+ * VERSION: v3.25
  * LAST UPDATED: 2025-10-30
  * 
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -22,7 +22,20 @@
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
  *
- * v3.24 FEATURE - RULE-SPECIFIC SEQUENCED PLACEHOLDERS:
+ * v3.25 FEATURE - SEQUENCED PLACEHOLDERS FOR DIVISION BY ZERO:
+ * - Extended sequenced placeholder system to divisionOperations rule
+ * - Changed from static defaultAltValue to DEF_VAL_DIV_BY_ZERO_N
+ * - Each division operation gets unique sequence number
+ * - Examples:
+ *   - First division: ifNaN(revenue / days, DEF_VAL_DIV_BY_ZERO_1)
+ *   - Second division: ifNaN(total / count, DEF_VAL_DIV_BY_ZERO_2)
+ *   - Third division: ifNaN(x / y, DEF_VAL_DIV_BY_ZERO_3)
+ * - Consistent with nullAccessProtection pattern (DEF_VAL_NULL_SAFETY_N)
+ * - Implementation matches v3.25: _instanceCounter, reset at line 1, instanceNumber in suggestion
+ * - Both rules now use rule-specific sequenced placeholders for clarity
+ * - Cache-busting updated to v=3.25 for all script loads
+ *
+ * v3.25 FEATURE - RULE-SPECIFIC SEQUENCED PLACEHOLDERS:
  * - Changed placeholder from DEFAULT_VALUE to rule-specific DEF_VAL_NULL_SAFETY_N
  * - Each nullAccessProtection instance gets unique sequence number
  * - Examples:
@@ -297,7 +310,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.24
+            Version: v3.25
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>
