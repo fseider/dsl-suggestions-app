@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.14
+ * VERSION: v3.15
  * LAST UPDATED: 2025-10-30
  * 
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -21,6 +21,19 @@
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
+ *
+ * v3.15 UX IMPROVEMENT:
+ * - Added labels to all suggestions for better clarity
+ * - Each rule now has a brief label identifying the suggestion type
+ * - Labels added to config: Division Safety, Query Performance, UniqueKey Config,
+ *   Naming Convention, Node Performance, Null Safety, Math Clarity, Code Cleanup
+ * - Suggestion display format:
+ *   - Advisory: "/* SUGGESTION - Query Performance: Ensure setting query()... */"
+ *   - Fixable: "/* SUGGESTION - Division Safety (Traditional): Use ifNaN... */"
+ *   - Fixable: "/* SUGGESTION - Division Safety (Method): Use ifNaN... */"
+ * - Users can now immediately identify what type of issue each suggestion addresses
+ * - Removed hardcoded 'fixed' property from mathOperationsParens rule
+ * - All suggestion objects now include label property from config
  *
  * v3.14 UX IMPROVEMENT:
  * - Fixed duplicate suggestions display for advisory rules
@@ -167,7 +180,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.14
+            Version: v3.15
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>

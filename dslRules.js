@@ -78,6 +78,7 @@ var DSL_RULES = [
                     message: suggestionMsg,
                     severity: ruleConfig.severity || 'warning',
                     rule: this.name,
+                    label: ruleConfig.label || this.name,
                     fixable: ruleConfig.autoFixEnabled || false,
                     original: expression
                 });
@@ -231,6 +232,7 @@ var DSL_RULES = [
                         message: suggestionMsg,
                         severity: ruleConfig.severity || 'info',
                         rule: this.name,
+                        label: ruleConfig.label || this.name,
                         fixable: false,
                         original: functionName + '('
                     });
@@ -256,6 +258,7 @@ var DSL_RULES = [
                         message: patternConfig.suggestion,
                         severity: ruleConfig.severity || 'info',
                         rule: this.name,
+                        label: ruleConfig.label || this.name,
                         fixable: false,
                         original: match[0]
                     });
@@ -315,6 +318,7 @@ var DSL_RULES = [
                         message: suggestionMsg,
                         severity: ruleConfig.severity || 'warning',
                         rule: this.name,
+                        label: ruleConfig.label || this.name,
                         fixable: false,
                         original: 'UniqueKey: ' + keyField
                     });
@@ -384,6 +388,7 @@ var DSL_RULES = [
                         message: suggestionMsg,
                         severity: ruleConfig.severity || 'info',
                         rule: this.name,
+                        label: ruleConfig.label || this.name,
                         fixable: ruleConfig.autoFixEnabled || false,
                         original: varName
                     });
@@ -450,6 +455,7 @@ var DSL_RULES = [
                     message: suggestionMsg,
                     severity: ruleConfig.severity || 'info',
                     rule: this.name,
+                    label: ruleConfig.label || this.name,
                     fixable: false,
                     original: node.fullMatch
                 });
@@ -537,6 +543,7 @@ var DSL_RULES = [
                         message: suggestionMsg,
                         severity: ruleConfig.severity || 'warning',
                         rule: this.name,
+                        label: ruleConfig.label || this.name,
                         fixable: ruleConfig.autoFixEnabled || false,
                         original: expression
                     });
@@ -627,9 +634,9 @@ var DSL_RULES = [
                         message: suggestionMsg,
                         severity: ruleConfig.severity || 'info',
                         rule: this.name,
+                        label: ruleConfig.label || this.name,
                         fixable: ruleConfig.autoFixEnabled || false,
-                        original: original,
-                        fixed: fixed
+                        original: original
                     });
                 }
             }
@@ -699,6 +706,7 @@ var DSL_RULES = [
                         message: suggestionMsg,
                         severity: ruleConfig.severity || 'info',
                         rule: this.name,
+                        label: ruleConfig.label || this.name,
                         fixable: false
                     });
                 }
@@ -713,6 +721,7 @@ var DSL_RULES = [
                     message: suggestionMsg,
                     severity: ruleConfig.severity || 'warning',
                     rule: this.name,
+                    label: ruleConfig.label || this.name,
                     fixable: false
                 });
             }

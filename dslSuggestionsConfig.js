@@ -39,6 +39,7 @@ var dslSuggestionsConfigData = {
   suggestionRules: {
     divisionOperations: {
       enabled: true,
+      label: "Division Safety",
       description: "Detect division operations that may need zero protection",
       suggestionType: "fixable",
       suggestion: "Use ifNaN({expression}, 0.0) for Divide-By-Zero protection.",
@@ -55,6 +56,7 @@ var dslSuggestionsConfigData = {
 
     queryFunctions: {
       enabled: true,
+      label: "Query Performance",
       description: "Query based functions impact performance. Should be set as One-Time / No-Copy",
       severity: "info",
       suggestionType: "advisory",
@@ -77,6 +79,7 @@ var dslSuggestionsConfigData = {
 
     uniqueKey: {
       enabled: true,
+      label: "UniqueKey Config",
       description: "uniqueKey function has special configuration requirements",
       suggestionType: "advisory",
       suggestion: "Ensure uniqueKey() expression is set to \"One-Time\" and \"No-Copy\" flags.",
@@ -85,6 +88,7 @@ var dslSuggestionsConfigData = {
 
     variableNaming: {
       enabled: true,
+      label: "Naming Convention",
       description: "Enforce lowerCamelCase naming convention",
       severity: "info",
       suggestionType: "fixable",
@@ -99,6 +103,7 @@ var dslSuggestionsConfigData = {
 
     nonOptimalNodeAccess: {
       enabled: true,
+      label: "Node Performance",
       description: "Hierarchy / Library node references that can impact continuous expression performance",
       severity: "info",
       suggestionType: "advisory",
@@ -120,6 +125,7 @@ var dslSuggestionsConfigData = {
 
     nullAccessProtection: {
       enabled: true,
+      label: "Null Safety",
       description: "Detect Node chains that may fail due to null/undefined values",
       suggestionType: "fixable",
       suggestion: "Add null protection using ifNull({expression}) for safe property access.",
@@ -134,6 +140,7 @@ var dslSuggestionsConfigData = {
 
     mathOperationsParens: {
       enabled: true,
+      label: "Math Clarity",
       description: "Detect math operations that may need parentheses for clarity",
       severity: "info",
       suggestionType: "advisory",
@@ -142,6 +149,7 @@ var dslSuggestionsConfigData = {
 
     extraneousBlocks: {
       enabled: true,
+      label: "Code Cleanup",
       description: "Detect unnecessary block statements with single content",
       severity: "info",
       suggestionType: "fixable",

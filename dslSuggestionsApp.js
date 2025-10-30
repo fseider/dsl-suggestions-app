@@ -315,14 +315,15 @@ function generateSuggestionsWithBothForms(code) {
         for (var j = 0; j < lineSuggestions.length; j++) {
             var suggestion = lineSuggestions[j];
             var indent = getIndent(lines[i]);
+            var label = suggestion.label || suggestion.rule || 'General';
 
             if (suggestion.fixable) {
                 // Fixable rules: Show both Traditional and Method forms
-                result.push(indent + '/* SUGGESTION (Traditional): ' + suggestion.message + ' */');
-                result.push(indent + '/* SUGGESTION (Method): ' + suggestion.message + ' */');
+                result.push(indent + '/* SUGGESTION - ' + label + ' (Traditional): ' + suggestion.message + ' */');
+                result.push(indent + '/* SUGGESTION - ' + label + ' (Method): ' + suggestion.message + ' */');
             } else {
                 // Advisory rules: Show only one suggestion
-                result.push(indent + '/* SUGGESTION: ' + suggestion.message + ' */');
+                result.push(indent + '/* SUGGESTION - ' + label + ': ' + suggestion.message + ' */');
             }
         }
     }
