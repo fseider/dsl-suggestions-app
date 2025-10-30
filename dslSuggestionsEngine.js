@@ -418,7 +418,7 @@ if (typeof window !== 'undefined') {
         console.log('[Engine] Loading dslSuggestionsConfig.js...');
 
         var script = document.createElement('script');
-        script.src = 'dslSuggestionsConfig.js';
+        script.src = 'dslSuggestionsConfig.js?v=3.23';
         script.async = false;
 
         script.onload = function() {
@@ -445,7 +445,7 @@ if (typeof window !== 'undefined') {
         console.log('[Engine] Loading dslRuleUtilities.js...');
 
         var script = document.createElement('script');
-        script.src = 'dslRuleUtilities.js';
+        script.src = 'dslRuleUtilities.js?v=3.23';
         script.async = false;
 
         script.onload = function() {
@@ -472,7 +472,7 @@ if (typeof window !== 'undefined') {
         console.log('[Engine] Loading dslRules.js (all 8 rules)...');
 
         var script = document.createElement('script');
-        script.src = 'dslRules.js';
+        script.src = 'dslRules.js?v=3.23';
         script.async = false;
 
         script.onload = function() {
