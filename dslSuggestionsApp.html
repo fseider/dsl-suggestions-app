@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.17
+ * VERSION: v3.16
  * LAST UPDATED: 2025-10-30
  * 
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -21,16 +21,6 @@
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
- *
- * v3.17 CONFIGURATION CHANGE:
- * - Changed nullAccessProtection rule from fixable to advisory
- * - Set suggestionType: "advisory" (was "fixable")
- * - Set autoFixEnabled: false (was true)
- * - Reason: Too many suggestions on common patterns like object.property()
- * - Advisory-only provides guidance without visual clutter of Traditional/Method forms
- * - Now shows single: "/* SUGGESTION - Null Safety: Add null protection... */"
- * - Instead of duplicate Traditional/Method suggestions for every property access
- * - Rule still detects potential null/undefined issues but doesn't auto-fix
  *
  * v3.16 UX IMPROVEMENT:
  * - Updated labels to shorter, more concise versions per user request
@@ -202,7 +192,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.17
+            Version: v3.16
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>
