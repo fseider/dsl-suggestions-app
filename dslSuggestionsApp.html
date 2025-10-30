@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.22
+ * VERSION: v3.23
  * LAST UPDATED: 2025-10-30
  * 
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -21,6 +21,17 @@
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
+ *
+ * v3.23 CHANGE - DEFAULT_VALUE PLACEHOLDER:
+ * - Changed from smart default detection to static DEFAULT_VALUE placeholder
+ * - Autofix now uses literal "DEFAULT_VALUE" text instead of type-specific defaults
+ * - User must manually replace DEFAULT_VALUE with appropriate value
+ * - Examples:
+ *   - Traditional: ifNull(xxDefQuote.imageList, DEFAULT_VALUE)
+ *   - Method: (xxDefQuote.imageList).ifNull(DEFAULT_VALUE)
+ * - Clearer indicator that user needs to provide the actual default value
+ * - Smart detection logic (_getSmartDefaultValue) remains in code but unused
+ * - Changes: Updated fix() to use 'DEFAULT_VALUE' instead of smart detection
  *
  * v3.22 FEATURE - SMART DEFAULT VALUES:
  * - Implemented smart default value detection for ifNull() autofix
@@ -263,7 +274,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.22
+            Version: v3.23
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>

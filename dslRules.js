@@ -679,8 +679,8 @@ var DSL_RULES = [
             var object = parts[0];
             var property = parts[1];
 
-            // Get smart default value based on property name
-            var defaultAltValue = this._getSmartDefaultValue(property);
+            // Use DEFAULT_VALUE placeholder for user to replace
+            var defaultAltValue = 'DEFAULT_VALUE';
 
             // Replace placeholders in template
             var fixed = DSLRuleUtils.Message.replacePlaceholders(template, {
