@@ -64,9 +64,12 @@ var DSL_RULES = [
                 var suggestionMsg = ruleConfig.suggestion ||
                     'Division operation detected. Consider using ifNaN({numerator} / {denominator}, 0) to prevent division by zero errors.';
 
+                var expression = numerator + ' / ' + denominator;
+
                 suggestionMsg = DSLRuleUtils.Message.replacePlaceholders(suggestionMsg, {
                     numerator: numerator,
-                    denominator: denominator
+                    denominator: denominator,
+                    expression: expression
                 });
 
                 suggestions.push({
@@ -76,8 +79,7 @@ var DSL_RULES = [
                     severity: ruleConfig.severity || 'warning',
                     rule: this.name,
                     fixable: ruleConfig.autoFixEnabled || false,
-                    original: numerator + ' / ' + denominator,
-                    fixed: 'ifNaN(' + numerator + ' / ' + denominator + ', 0)'
+                    original: expression
                 });
             }
 

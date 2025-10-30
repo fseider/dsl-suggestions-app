@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.09
+ * VERSION: v3.10
  * LAST UPDATED: 2025-10-30
  * 
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -21,6 +21,16 @@
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
+ *
+ * v3.10 BUG FIX (CRITICAL):
+ * - Fixed {expression} placeholder not being replaced in suggestion messages
+ * - Removed hardcoded 'fixed' property with 0 instead of config's defaultAltValue
+ * - Issue 1: Messages showed "Use ifNaN({expression}, 0.0)" literally instead of actual expression
+ * - Issue 2: Applied code used 0 instead of config's 0.0 due to hardcoded fixed property
+ * - Added {expression} to replacePlaceholders call in check() function
+ * - Removed hardcoded fixed property - fix() function generates correct code dynamically
+ * - Suggestion messages now show actual expression: "Use ifNaN(revenue / quantity, 0.0)"
+ * - Applied code now correctly uses config's defaultAltValue (0.0, not 0)
  *
  * v3.09 BUG FIX (CRITICAL):
  * - Fixed triple-wrapping bug when multiple identical expressions exist
@@ -112,7 +122,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.09
+            Version: v3.10
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>
