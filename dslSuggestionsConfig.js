@@ -69,11 +69,6 @@ var dslSuggestionsConfigData = {
         "query",
         "sumQuery",
         "weightedAverageQuery"
-      ],
-      inefficientPatterns: [
-        { pattern: /\.filter\([^)]+\)\.first\(\)/g, suggestion: 'Use .findFirst() instead of .filter().first()' },
-        { pattern: /\.filter\([^)]+\)\.count\(\)/g, suggestion: 'Use .count() with condition instead of .filter().count()' },
-        { pattern: /\.map\([^)]+\)\.filter\([^)]+\)/g, suggestion: 'Consider combining or reordering .map() and .filter()' }
       ]
     },
 

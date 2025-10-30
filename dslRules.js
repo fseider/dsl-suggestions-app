@@ -243,7 +243,7 @@ var DSL_RULES = [
 
             var lineWithoutStrings = DSLRuleUtils.String.removeStringLiterals(line);
 
-            // PRIMARY FEATURE: Check for query function names
+            // Check for query function names
             var functionNames = ruleConfig.functionNames || [];
             if (functionNames.length > 0) {
                 // Build regex pattern: \b(func1|func2|func3)\s*\(
@@ -275,32 +275,6 @@ var DSL_RULES = [
                         label: ruleConfig.label || this.name,
                         fixable: false,
                         original: functionName + '('
-                    });
-                }
-            }
-
-            // SECONDARY FEATURE: Check for inefficient patterns (optional)
-            var inefficientPatterns = ruleConfig.inefficientPatterns || [];
-            for (var i = 0; i < inefficientPatterns.length; i++) {
-                var patternConfig = inefficientPatterns[i];
-                var match;
-
-                while ((match = patternConfig.pattern.exec(lineWithoutStrings)) !== null) {
-                    var position = match.index;
-
-                    if (DSLRuleUtils.String.isInsideString(line, position)) {
-                        continue;
-                    }
-
-                    suggestions.push({
-                        line: lineNumber,
-                        column: position,
-                        message: patternConfig.suggestion,
-                        severity: ruleConfig.severity || 'info',
-                        rule: this.name,
-                        label: ruleConfig.label || this.name,
-                        fixable: false,
-                        original: match[0]
                     });
                 }
             }
