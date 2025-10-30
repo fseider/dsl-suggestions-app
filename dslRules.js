@@ -592,6 +592,62 @@ var DSL_RULES = [
             return false;
         },
 
+        _getSmartDefaultValue: function(property) {
+            // Smart default value detection based on property name patterns
+            var propertyLower = property.toLowerCase();
+
+            // String patterns
+            var stringPatterns = ['name', 'label', 'title', 'text', 'description', 'message', 'content', 'string', 'str'];
+            for (var i = 0; i < stringPatterns.length; i++) {
+                if (propertyLower.indexOf(stringPatterns[i]) !== -1) {
+                    return '""';
+                }
+            }
+
+            // Numeric patterns
+            var numericPatterns = ['count', 'number', 'index', 'size', 'length', 'id', 'quantity', 'total'];
+            for (var i = 0; i < numericPatterns.length; i++) {
+                if (propertyLower.indexOf(numericPatterns[i]) !== -1) {
+                    return '0';
+                }
+            }
+
+            // Array patterns
+            var arrayPatterns = ['list', 'array', 'items', 'elements', 'collection'];
+            for (var i = 0; i < arrayPatterns.length; i++) {
+                if (propertyLower.indexOf(arrayPatterns[i]) !== -1) {
+                    return '[]';
+                }
+            }
+
+            // Object patterns
+            var objectPatterns = ['map', 'dict', 'object', 'data', 'config', 'settings'];
+            for (var i = 0; i < objectPatterns.length; i++) {
+                if (propertyLower.indexOf(objectPatterns[i]) !== -1) {
+                    return '{}';
+                }
+            }
+
+            // Boolean patterns
+            var booleanPatterns = ['flag', 'is', 'has', 'should', 'can', 'enabled', 'active'];
+            for (var i = 0; i < booleanPatterns.length; i++) {
+                if (propertyLower.indexOf(booleanPatterns[i]) !== -1) {
+                    return 'false';
+                }
+            }
+
+            // Date/Time patterns - return null
+            var nullPatterns = ['date', 'time', 'timestamp'];
+            for (var i = 0; i < nullPatterns.length; i++) {
+                if (propertyLower.indexOf(nullPatterns[i]) !== -1) {
+                    return 'null';
+                }
+            }
+
+            // Default fallback
+            return 'null';
+        },
+
         fix: function(code, suggestion, config) {
             var ruleConfig = config.suggestionRules.nullAccessProtection;
 
@@ -623,8 +679,10 @@ var DSL_RULES = [
             var object = parts[0];
             var property = parts[1];
 
+            // Get smart default value based on property name
+            var defaultAltValue = this._getSmartDefaultValue(property);
+
             // Replace placeholders in template
-            var defaultAltValue = ruleConfig.defaultAltValue || 'defaultValue';
             var fixed = DSLRuleUtils.Message.replacePlaceholders(template, {
                 object: object,
                 property: property,

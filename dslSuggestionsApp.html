@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.21
+ * VERSION: v3.22
  * LAST UPDATED: 2025-10-30
  * 
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -21,6 +21,23 @@
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
+ *
+ * v3.22 FEATURE - SMART DEFAULT VALUES:
+ * - Implemented smart default value detection for ifNull() autofix
+ * - Analyzes property names to determine appropriate default values
+ * - String patterns (name, title, text, string, etc.) → ""
+ * - Numeric patterns (count, id, quantity, index, etc.) → 0
+ * - Array patterns (list, items, elements, array, etc.) → []
+ * - Object patterns (map, data, object, config, etc.) → {}
+ * - Boolean patterns (flag, is, has, enabled, active, etc.) → false
+ * - Date/Time patterns (date, time, timestamp) → null
+ * - Examples:
+ *   - xxDefQuote.imageList → ifNull(xxDefQuote.imageList, [])
+ *   - order.customer.name → ifNull(order.customer.name, "")
+ *   - product.inventory.quantity → ifNull(product.inventory.quantity, 0)
+ * - Replaces static "ref, string, etc." placeholder with intelligent defaults
+ * - Changes: Added _getSmartDefaultValue() helper function in dslRules.js
+ * - Updated fix() to call _getSmartDefaultValue(property) instead of using config value
  *
  * v3.21 BUG FIX - AUTOFIX FUNCTIONALITY:
  * - Fixed nullAccessProtection autofix not working in "Suggestions Applied" output
@@ -246,7 +263,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.21
+            Version: v3.22
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>
