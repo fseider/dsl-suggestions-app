@@ -202,12 +202,43 @@ var DSL_RULES = [
 
             var lineWithoutStrings = DSLRuleUtils.String.removeStringLiterals(line);
 
-            var inefficientPatterns = ruleConfig.inefficientPatterns || [
-                { pattern: /\.filter\([^)]+\)\.first\(\)/g, suggestion: 'Use .findFirst() instead of .filter().first()' },
-                { pattern: /\.filter\([^)]+\)\.count\(\)/g, suggestion: 'Use .count() with condition instead of .filter().count()' },
-                { pattern: /\.map\([^)]+\)\.filter\([^)]+\)/g, suggestion: 'Consider combining or reordering .map() and .filter()' }
-            ];
+            // PRIMARY FEATURE: Check for query function names
+            var functionNames = ruleConfig.functionNames || [];
+            if (functionNames.length > 0) {
+                // Build regex pattern: \b(func1|func2|func3)\s*\(
+                var funcPattern = '\\b(' + functionNames.join('|') + ')\\s*\\(';
+                var functionRegex = new RegExp(funcPattern, 'g');
+                var match;
 
+                while ((match = functionRegex.exec(lineWithoutStrings)) !== null) {
+                    var functionName = match[1];
+                    var position = match.index;
+
+                    if (DSLRuleUtils.String.isInsideString(line, position)) {
+                        continue;
+                    }
+
+                    var suggestionMsg = ruleConfig.suggestion ||
+                        'Consider setting {function}() as "One-Time" for better performance.';
+
+                    suggestionMsg = DSLRuleUtils.Message.replacePlaceholders(suggestionMsg, {
+                        function: functionName
+                    });
+
+                    suggestions.push({
+                        line: lineNumber,
+                        column: position,
+                        message: suggestionMsg,
+                        severity: ruleConfig.severity || 'info',
+                        rule: this.name,
+                        fixable: false,
+                        original: functionName + '('
+                    });
+                }
+            }
+
+            // SECONDARY FEATURE: Check for inefficient patterns (optional)
+            var inefficientPatterns = ruleConfig.inefficientPatterns || [];
             for (var i = 0; i < inefficientPatterns.length; i++) {
                 var patternConfig = inefficientPatterns[i];
                 var match;
