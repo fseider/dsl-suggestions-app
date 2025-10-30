@@ -146,12 +146,37 @@ var DSL_RULES = [
                 .replace('{expression}', suggestion.original)
                 .replace('{defaultAltValue}', defaultValue);
 
-            var originalPattern = new RegExp(
-                DSLRuleUtils.Regex.escape(suggestion.original),
-                'g'
-            );
+            // Process line by line to avoid double-wrapping when multiple identical expressions exist
+            var lines = code.split('\n');
+            var modified = false;
 
-            return code.replace(originalPattern, fixedCode);
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i];
+                var pattern = new RegExp(DSLRuleUtils.Regex.escape(suggestion.original), 'g');
+                var match;
+                var newLine = '';
+                var lastIndex = 0;
+
+                while ((match = pattern.exec(line)) !== null) {
+                    // Check if this specific occurrence is already wrapped
+                    if (!this._isAlreadyWrapped(line, match, ruleConfig)) {
+                        // Replace this occurrence
+                        newLine += line.substring(lastIndex, match.index) + fixedCode;
+                        lastIndex = match.index + match[0].length;
+                        modified = true;
+                    } else {
+                        // Keep the original (it's already wrapped)
+                        newLine += line.substring(lastIndex, match.index + match[0].length);
+                        lastIndex = match.index + match[0].length;
+                    }
+                }
+
+                // Add the rest of the line
+                newLine += line.substring(lastIndex);
+                lines[i] = newLine;
+            }
+
+            return lines.join('\n');
         }
     },
 
