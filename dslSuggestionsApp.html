@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.19
+ * VERSION: v3.20
  * LAST UPDATED: 2025-10-30
  * 
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -21,6 +21,18 @@
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
+ *
+ * v3.20 UX IMPROVEMENT - CODE LINE COLOR CODING:
+ * - Applied color coding to the code statements themselves, not just suggestions
+ * - Objects highlighted in suggestions now also highlighted in the code line
+ * - Same color used for object in both code line and its suggestion
+ * - Example: xxDefQuote.imageList.add(xxAltQuote.someString)
+ *   - xxDefQuote highlighted in red in both code and suggestion
+ *   - xxAltQuote highlighted in blue in both code and suggestion
+ * - Makes it easy to see which object each suggestion refers to
+ * - Plain text output unchanged - only HTML output has color coding
+ * - Changes: Updated generateSuggestionsWithColorCoding to colorize code lines
+ * - Added extractHighlightedObjects() and colorizeCodeLine() helper functions
  *
  * v3.19 UX IMPROVEMENT - COLOR CYCLING:
  * - Each instance of the same rule now gets a distinct color in HTML output
@@ -223,7 +235,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.19
+            Version: v3.20
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>

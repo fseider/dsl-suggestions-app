@@ -336,7 +336,7 @@ function generateSuggestionsWithBothForms(code) {
     return result.join('\n');
 }
 
-// v3.19 - Generate suggestions with HTML color coding and distinct colors per rule instance
+// v3.20 - Generate suggestions with HTML color coding and distinct colors per rule instance
 function generateSuggestionsWithColorCoding(code) {
     if (!code || typeof analyzeDSL !== 'function') {
         return 'Analysis functionality not loaded.';
@@ -365,6 +365,38 @@ function generateSuggestionsWithColorCoding(code) {
         return text.replace(/\*\*([^*]+)\*\*/g, '<span class="highlight-object-' + colorIndex + '">$1</span>');
     }
 
+    // Helper function to extract objects from **markers** in text
+    function extractHighlightedObjects(text) {
+        var objects = [];
+        var regex = /\*\*([^*]+)\*\*/g;
+        var match;
+        while ((match = regex.exec(text)) !== null) {
+            objects.push(match[1]);
+        }
+        return objects;
+    }
+
+    // Helper function to colorize code line with object->color mapping
+    function colorizeCodeLine(line, objectColorMap) {
+        var escapedLine = escapeHtml(line);
+
+        // Sort objects by length (longest first) to avoid partial replacements
+        var objectsToReplace = Object.keys(objectColorMap).sort(function(a, b) {
+            return b.length - a.length;
+        });
+
+        for (var i = 0; i < objectsToReplace.length; i++) {
+            var obj = objectsToReplace[i];
+            var colorIndex = objectColorMap[obj];
+
+            // Create a regex that matches the object as a whole word (with word boundaries)
+            var regex = new RegExp('\\b' + obj.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'g');
+            escapedLine = escapedLine.replace(regex, '<span class="highlight-object-' + colorIndex + '">' + obj + '</span>');
+        }
+
+        return escapedLine;
+    }
+
     // Track rule instance counts for color cycling
     var ruleInstanceCount = {};
 
@@ -373,19 +405,17 @@ function generateSuggestionsWithColorCoding(code) {
     var result = [];
 
     for (var i = 0; i < lines.length; i++) {
-        // Escape HTML in code line
-        result.push(escapeHtml(lines[i]));
-
         // Find suggestions for this line
         var lineSuggestions = analysis.suggestions.filter(function(s) {
             return s.line === i + 1;
         });
 
-        // For each suggestion, show based on whether it's fixable and has different forms
+        // Build object -> color mapping for this line
+        var objectColorMap = {};
+        var suggestionData = [];
+
         for (var j = 0; j < lineSuggestions.length; j++) {
             var suggestion = lineSuggestions[j];
-            var indent = getIndent(lines[i]);
-            var label = suggestion.label || suggestion.rule || 'General';
             var ruleName = suggestion.rule || 'unknown';
 
             // Track instance count for this rule
@@ -396,6 +426,30 @@ function generateSuggestionsWithColorCoding(code) {
 
             // Calculate color index (cycle through 6 colors: 1-6)
             var colorIndex = ((ruleInstanceCount[ruleName] - 1) % 6) + 1;
+
+            // Extract highlighted objects from the message
+            var highlightedObjects = extractHighlightedObjects(suggestion.message);
+            for (var k = 0; k < highlightedObjects.length; k++) {
+                objectColorMap[highlightedObjects[k]] = colorIndex;
+            }
+
+            // Store suggestion data for later output
+            suggestionData.push({
+                suggestion: suggestion,
+                colorIndex: colorIndex
+            });
+        }
+
+        // Output the code line with color coding
+        result.push(colorizeCodeLine(lines[i], objectColorMap));
+
+        // Output the suggestions
+        for (var j = 0; j < suggestionData.length; j++) {
+            var data = suggestionData[j];
+            var suggestion = data.suggestion;
+            var colorIndex = data.colorIndex;
+            var indent = getIndent(lines[i]);
+            var label = suggestion.label || suggestion.rule || 'General';
 
             // Escape HTML but preserve ** markers for highlighting
             var message = escapeHtml(suggestion.message);
