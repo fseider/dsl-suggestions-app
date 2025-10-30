@@ -505,9 +505,15 @@ var DSL_RULES = [
     {
         name: 'nullAccessProtection',
         version: 'v2.00',
+        _instanceCounter: 0,
 
         check: function(line, lineNumber, allLines, context, config) {
             var suggestions = [];
+
+            // Reset counter at start of new analysis
+            if (lineNumber === 1) {
+                this._instanceCounter = 0;
+            }
 
             if (context && context.isInComment) {
                 return suggestions;
@@ -558,6 +564,9 @@ var DSL_RULES = [
                     var hasDifferentForms = ruleConfig.fixTemplates &&
                                             ruleConfig.fixTemplates.traditional !== ruleConfig.fixTemplates.method;
 
+                    // Increment instance counter for this suggestion
+                    this._instanceCounter++;
+
                     suggestions.push({
                         line: lineNumber,
                         column: position,
@@ -567,7 +576,8 @@ var DSL_RULES = [
                         label: ruleConfig.label || this.name,
                         fixable: ruleConfig.autoFixEnabled || false,
                         hasDifferentForms: hasDifferentForms,
-                        original: expression
+                        original: expression,
+                        instanceNumber: this._instanceCounter
                     });
                 }
             }
@@ -679,8 +689,9 @@ var DSL_RULES = [
             var object = parts[0];
             var property = parts[1];
 
-            // Use DEFAULT_VALUE placeholder for user to replace
-            var defaultAltValue = 'DEFAULT_VALUE';
+            // Use rule-specific sequenced placeholder
+            var instanceNum = suggestion.instanceNumber || 1;
+            var defaultAltValue = 'DEF_VAL_NULL_SAFETY_' + instanceNum;
 
             // Replace placeholders in template
             var fixed = DSLRuleUtils.Message.replacePlaceholders(template, {

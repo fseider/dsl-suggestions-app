@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.23
+ * VERSION: v3.24
  * LAST UPDATED: 2025-10-30
  * 
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -21,6 +21,27 @@
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
+ *
+ * v3.24 FEATURE - RULE-SPECIFIC SEQUENCED PLACEHOLDERS:
+ * - Changed placeholder from DEFAULT_VALUE to rule-specific DEF_VAL_NULL_SAFETY_N
+ * - Each nullAccessProtection instance gets unique sequence number
+ * - Examples:
+ *   - First instance: ifNull(xxDefQuote.imageList, DEF_VAL_NULL_SAFETY_1)
+ *   - Second instance: ifNull(xxAltQuote.someString, DEF_VAL_NULL_SAFETY_2)
+ *   - Third instance: ifNull(order.customer, DEF_VAL_NULL_SAFETY_3)
+ * - Sequence resets at start of each analysis (line 1)
+ * - Benefits:
+ *   - Clear which placeholder corresponds to which fix
+ *   - Can replace each with different appropriate values
+ *   - Rule name in placeholder shows what protection is being applied
+ * - Implementation:
+ *   - Added _instanceCounter property to nullAccessProtection rule
+ *   - Counter resets to 0 at lineNumber === 1
+ *   - Incremented for each suggestion created
+ *   - instanceNumber added to suggestion object
+ *   - fix() uses instanceNumber to generate DEF_VAL_NULL_SAFETY_N
+ * - Changes: Updated dslRules.js with instance tracking and sequenced placeholder generation
+ * - Cache-busting updated to v=3.24 for all script loads
  *
  * v3.23 CHANGE - DEFAULT_VALUE PLACEHOLDER + CACHE BUSTING:
  * - Changed from smart default detection to static DEFAULT_VALUE placeholder
@@ -276,7 +297,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.23
+            Version: v3.24
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>
@@ -323,8 +344,8 @@
     - Faster page load: 4 HTTP requests instead of 10+
     -->
 
-    <script src="dslSuggestionsEngine.js?v=3.23" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
-    <script src="dslSuggestionsApp.js?v=3.23"></script>
+    <script src="dslSuggestionsEngine.js?v=3.24" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
+    <script src="dslSuggestionsApp.js?v=3.24"></script>
 
     <style>
         /* v3.00 - Simplified styles, removed all popup-related CSS */
