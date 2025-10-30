@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.17
+ * VERSION: v3.18
  * LAST UPDATED: 2025-10-30
  * 
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -21,6 +21,16 @@
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
+ *
+ * v3.18 UX IMPROVEMENT - DUAL OUTPUT:
+ * - Added second output box showing HTML version with color coding
+ * - Plain text output (Option A): Original textarea with ** markers for highlighting
+ * - HTML output (Option C): Color-coded version highlighting objects at risk in red
+ * - Both outputs display simultaneously for easy comparison
+ * - Temporary feature to help determine which highlighting approach works best
+ * - Color coding converts **object** markers to red bold text in HTML output
+ * - Changes: Added htmlOutput div, generateSuggestionsWithColorCoding function
+ * - Updated clearSuggestionInput to clear both outputs
  *
  * v3.17 RULE REFINEMENT:
  * - Refined nullAccessProtection rule to distinguish property access from function calls
@@ -203,7 +213,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.17
+            Version: v3.18
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>
@@ -216,8 +226,11 @@
             <button onclick="copyToClipboard('suggestionOutput')">Copy Suggestions</button>
         </div>
         
-        <label for="suggestionOutput" style="display: block; margin-top: 20px; margin-bottom: 10px;">Suggestions:</label>
+        <label for="suggestionOutput" style="display: block; margin-top: 20px; margin-bottom: 10px;">Suggestions (Plain Text):</label>
         <div id="suggestionOutput" class="code-output" data-placeholder="Suggestions will appear here..."></div>
+
+        <label for="htmlOutput" style="display: block; margin-top: 20px; margin-bottom: 10px;">Suggestions (HTML with Color Coding):</label>
+        <div id="htmlOutput" class="code-output html-output" data-placeholder="Color-coded suggestions will appear here..."></div>
 
         <label for="suggestionsApplied" style="display: block; margin-top: 20px; margin-bottom: 5px;">Suggestions Applied to Formatted Expression:</label>
         <div style="margin-bottom: 8px; padding: 8px; background: #f5f5f5; border-radius: 4px;">
@@ -273,6 +286,16 @@
             content: attr(data-placeholder);
             color: #999;
             font-style: italic;
+        }
+
+        .html-output {
+            background-color: #fff;
+            line-height: 1.6;
+        }
+
+        .html-output .highlight-object {
+            color: #d32f2f;
+            font-weight: bold;
         }
 
         .container {

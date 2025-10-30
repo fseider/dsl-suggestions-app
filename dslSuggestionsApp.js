@@ -274,8 +274,13 @@ function getSuggestions() {
         if (typeof generateCodeSuggestions === 'function') {
             var suggestions = generateSuggestionsWithBothForms(code);
             setElementContent('suggestionOutput', suggestions);
+
+            // Also generate HTML version with color coding
+            var htmlSuggestions = generateSuggestionsWithColorCoding(code);
+            document.getElementById('htmlOutput').innerHTML = htmlSuggestions;
         } else {
             setElementContent('suggestionOutput', 'Suggestions functionality not loaded.');
+            document.getElementById('htmlOutput').innerHTML = 'Suggestions functionality not loaded.';
         }
 
         // Generate applied suggestions with selected form
@@ -324,6 +329,72 @@ function generateSuggestionsWithBothForms(code) {
             } else {
                 // Advisory rules OR fixable rules with single form
                 result.push(indent + '/* SUGGESTION - ' + label + ': ' + suggestion.message + ' */');
+            }
+        }
+    }
+
+    return result.join('\n');
+}
+
+// v3.18 - Generate suggestions with HTML color coding
+function generateSuggestionsWithColorCoding(code) {
+    if (!code || typeof analyzeDSL !== 'function') {
+        return 'Analysis functionality not loaded.';
+    }
+
+    // Get raw analysis results
+    var analysis = analyzeDSL(code);
+    if (!analysis || !analysis.suggestions || analysis.suggestions.length === 0) {
+        return 'No suggestions found. Code looks good!';
+    }
+
+    // Helper function to escape HTML
+    function escapeHtml(text) {
+        var map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
+
+    // Helper function to convert **text** to colored spans
+    function highlightObjects(text) {
+        return text.replace(/\*\*([^*]+)\*\*/g, '<span class="highlight-object">$1</span>');
+    }
+
+    // Build output showing both forms with color coding
+    var lines = code.split('\n');
+    var result = [];
+
+    for (var i = 0; i < lines.length; i++) {
+        // Escape HTML in code line
+        result.push(escapeHtml(lines[i]));
+
+        // Find suggestions for this line
+        var lineSuggestions = analysis.suggestions.filter(function(s) {
+            return s.line === i + 1;
+        });
+
+        // For each suggestion, show based on whether it's fixable and has different forms
+        for (var j = 0; j < lineSuggestions.length; j++) {
+            var suggestion = lineSuggestions[j];
+            var indent = getIndent(lines[i]);
+            var label = suggestion.label || suggestion.rule || 'General';
+
+            // Escape HTML but preserve ** markers for highlighting
+            var message = escapeHtml(suggestion.message);
+            message = highlightObjects(message);
+
+            if (suggestion.fixable && suggestion.hasDifferentForms) {
+                // Fixable rules with different Traditional/Method forms
+                result.push(indent + '/* SUGGESTION - ' + label + ' (Traditional): ' + message + ' */');
+                result.push(indent + '/* SUGGESTION - ' + label + ' (Method): ' + message + ' */');
+            } else {
+                // Advisory rules OR fixable rules with single form
+                result.push(indent + '/* SUGGESTION - ' + label + ': ' + message + ' */');
             }
         }
     }
@@ -519,7 +590,9 @@ function clearSuggestionInput() {
     // v2.07: Use helper function for div/textarea compatibility
     setElementContent('suggestionOutput', '');
     setElementContent('suggestionsApplied', '');
-    
+    // v3.18: Clear HTML output
+    document.getElementById('htmlOutput').innerHTML = '';
+
     // v2.09 - Clear original suggestions
     originalSuggestions = '';
     // v2.14 - Clear original applied suggestions
