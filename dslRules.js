@@ -72,6 +72,10 @@ var DSL_RULES = [
                     expression: expression
                 });
 
+                // Check if Traditional and Method forms are different
+                var hasDifferentForms = ruleConfig.fixTemplates &&
+                                        ruleConfig.fixTemplates.traditional !== ruleConfig.fixTemplates.method;
+
                 suggestions.push({
                     line: lineNumber,
                     column: position,
@@ -80,6 +84,7 @@ var DSL_RULES = [
                     rule: this.name,
                     label: ruleConfig.label || this.name,
                     fixable: ruleConfig.autoFixEnabled || false,
+                    hasDifferentForms: hasDifferentForms,
                     original: expression
                 });
             }
@@ -382,6 +387,10 @@ var DSL_RULES = [
                         correctedName: camelCaseName
                     });
 
+                    // Check if Traditional and Method forms are different
+                    var hasDifferentForms = ruleConfig.fixTemplates &&
+                                            ruleConfig.fixTemplates.traditional !== ruleConfig.fixTemplates.method;
+
                     suggestions.push({
                         line: lineNumber,
                         column: position,
@@ -390,6 +399,7 @@ var DSL_RULES = [
                         rule: this.name,
                         label: ruleConfig.label || this.name,
                         fixable: ruleConfig.autoFixEnabled || false,
+                        hasDifferentForms: hasDifferentForms,
                         original: varName
                     });
                 }
@@ -537,6 +547,10 @@ var DSL_RULES = [
                         expression: expression
                     });
 
+                    // Check if Traditional and Method forms are different
+                    var hasDifferentForms = ruleConfig.fixTemplates &&
+                                            ruleConfig.fixTemplates.traditional !== ruleConfig.fixTemplates.method;
+
                     suggestions.push({
                         line: lineNumber,
                         column: position,
@@ -545,6 +559,7 @@ var DSL_RULES = [
                         rule: this.name,
                         label: ruleConfig.label || this.name,
                         fixable: ruleConfig.autoFixEnabled || false,
+                        hasDifferentForms: hasDifferentForms,
                         original: expression
                     });
                 }
@@ -700,6 +715,10 @@ var DSL_RULES = [
                     var suggestionMsg = ruleConfig.suggestion ||
                         'Unnecessary block detected. Single statement does not require braces.';
 
+                    // Check if Traditional and Method forms are different
+                    var hasDifferentForms = ruleConfig.fixTemplates &&
+                                            ruleConfig.fixTemplates.traditional !== ruleConfig.fixTemplates.method;
+
                     suggestions.push({
                         line: lineNumber,
                         column: 0,
@@ -707,13 +726,18 @@ var DSL_RULES = [
                         severity: ruleConfig.severity || 'info',
                         rule: this.name,
                         label: ruleConfig.label || this.name,
-                        fixable: false
+                        fixable: ruleConfig.autoFixEnabled || false,
+                        hasDifferentForms: hasDifferentForms
                     });
                 }
             }
 
             if (trimmedLine === '{}' || (trimmedLine === '{' && lineNumber < allLines.length && allLines[lineNumber].trim() === '}')) {
                 var suggestionMsg = ruleConfig.suggestion || 'Empty block detected. Consider removing or adding implementation.';
+
+                // Check if Traditional and Method forms are different
+                var hasDifferentForms = ruleConfig.fixTemplates &&
+                                        ruleConfig.fixTemplates.traditional !== ruleConfig.fixTemplates.method;
 
                 suggestions.push({
                     line: lineNumber,
@@ -722,7 +746,8 @@ var DSL_RULES = [
                     severity: ruleConfig.severity || 'warning',
                     rule: this.name,
                     label: ruleConfig.label || this.name,
-                    fixable: false
+                    fixable: ruleConfig.autoFixEnabled || false,
+                    hasDifferentForms: hasDifferentForms
                 });
             }
 

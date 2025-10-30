@@ -311,18 +311,18 @@ function generateSuggestionsWithBothForms(code) {
             return s.line === i + 1;
         });
 
-        // For each suggestion, show based on whether it's fixable
+        // For each suggestion, show based on whether it's fixable and has different forms
         for (var j = 0; j < lineSuggestions.length; j++) {
             var suggestion = lineSuggestions[j];
             var indent = getIndent(lines[i]);
             var label = suggestion.label || suggestion.rule || 'General';
 
-            if (suggestion.fixable) {
-                // Fixable rules: Show both Traditional and Method forms
+            if (suggestion.fixable && suggestion.hasDifferentForms) {
+                // Fixable rules with different Traditional/Method forms
                 result.push(indent + '/* SUGGESTION - ' + label + ' (Traditional): ' + suggestion.message + ' */');
                 result.push(indent + '/* SUGGESTION - ' + label + ' (Method): ' + suggestion.message + ' */');
             } else {
-                // Advisory rules: Show only one suggestion
+                // Advisory rules OR fixable rules with single form
                 result.push(indent + '/* SUGGESTION - ' + label + ': ' + suggestion.message + ' */');
             }
         }

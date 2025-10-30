@@ -39,7 +39,7 @@ var dslSuggestionsConfigData = {
   suggestionRules: {
     divisionOperations: {
       enabled: true,
-      label: "Division Safety",
+      label: "Div By 0",
       description: "Detect division operations that may need zero protection",
       suggestionType: "fixable",
       suggestion: "Use ifNaN({expression}, 0.0) for Divide-By-Zero protection.",
@@ -56,7 +56,7 @@ var dslSuggestionsConfigData = {
 
     queryFunctions: {
       enabled: true,
-      label: "Query Performance",
+      label: "Query",
       description: "Query based functions impact performance. Should be set as One-Time / No-Copy",
       severity: "info",
       suggestionType: "advisory",
@@ -79,7 +79,7 @@ var dslSuggestionsConfigData = {
 
     uniqueKey: {
       enabled: true,
-      label: "UniqueKey Config",
+      label: "UniqueKey",
       description: "uniqueKey function has special configuration requirements",
       suggestionType: "advisory",
       suggestion: "Ensure uniqueKey() expression is set to \"One-Time\" and \"No-Copy\" flags.",
@@ -88,7 +88,7 @@ var dslSuggestionsConfigData = {
 
     variableNaming: {
       enabled: true,
-      label: "Naming Convention",
+      label: "Var Naming",
       description: "Enforce lowerCamelCase naming convention",
       severity: "info",
       suggestionType: "fixable",
@@ -103,7 +103,7 @@ var dslSuggestionsConfigData = {
 
     nonOptimalNodeAccess: {
       enabled: true,
-      label: "Node Performance",
+      label: "Node Perf",
       description: "Hierarchy / Library node references that can impact continuous expression performance",
       severity: "info",
       suggestionType: "advisory",
@@ -149,7 +149,7 @@ var dslSuggestionsConfigData = {
 
     extraneousBlocks: {
       enabled: true,
-      label: "Code Cleanup",
+      label: "Extraneous Block",
       description: "Detect unnecessary block statements with single content",
       severity: "info",
       suggestionType: "fixable",
