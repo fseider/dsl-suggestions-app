@@ -42,7 +42,7 @@ var dslSuggestionsConfigData = {
       label: "Div By 0",
       description: "Detect division operations that may need zero protection",
       suggestionType: "advisory",
-      suggestion: "Division detected in expression. Wrap entire formula with ifNaN({expression}, DEFAULT_VALUE) for Divide-By-Zero protection.",
+      suggestion: "Division detected in expression. Wrap entire formula with ifNaN(**{expression}**, DEFAULT_VALUE) for Divide-By-Zero protection.",
       autoFixEnabled: false,
       fixTemplates: {
         traditional: "ifNaN({expression}, {defaultAltValue})",
