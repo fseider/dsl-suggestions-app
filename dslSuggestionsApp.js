@@ -311,16 +311,19 @@ function generateSuggestionsWithBothForms(code) {
             return s.line === i + 1;
         });
 
-        // For each suggestion, show both Traditional and Method forms
+        // For each suggestion, show based on whether it's fixable
         for (var j = 0; j < lineSuggestions.length; j++) {
             var suggestion = lineSuggestions[j];
             var indent = getIndent(lines[i]);
 
-            // Show Traditional form
-            result.push(indent + '/* SUGGESTION (Traditional): ' + suggestion.message + ' */');
-
-            // Show Method form
-            result.push(indent + '/* SUGGESTION (Method): ' + suggestion.message + ' */');
+            if (suggestion.fixable) {
+                // Fixable rules: Show both Traditional and Method forms
+                result.push(indent + '/* SUGGESTION (Traditional): ' + suggestion.message + ' */');
+                result.push(indent + '/* SUGGESTION (Method): ' + suggestion.message + ' */');
+            } else {
+                // Advisory rules: Show only one suggestion
+                result.push(indent + '/* SUGGESTION: ' + suggestion.message + ' */');
+            }
         }
     }
 

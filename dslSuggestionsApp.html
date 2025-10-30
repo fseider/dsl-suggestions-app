@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.13
+ * VERSION: v3.14
  * LAST UPDATED: 2025-10-30
  * 
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -21,6 +21,18 @@
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
+ *
+ * v3.14 UX IMPROVEMENT:
+ * - Fixed duplicate suggestions display for advisory rules
+ * - Issue: Advisory rules (queryFunctions, uniqueKey, etc.) showed duplicate suggestions
+ * - Example: Two identical "/* SUGGESTION (Traditional/Method): ... */" comments
+ * - Root cause: UI showed both Traditional and Method forms for ALL rules
+ * - Traditional vs Method forms only make sense for FIXABLE rules (different outputs)
+ * - Advisory rules have no auto-fix, so both forms are identical
+ * - Solution: Check suggestion.fixable property before displaying
+ * - Fixable rules: Show both Traditional and Method forms (user can choose)
+ * - Advisory rules: Show single "/* SUGGESTION: ... */" comment
+ * - Reduces visual clutter and confusion for advisory-only suggestions
  *
  * v3.13 BUG FIX (CRITICAL):
  * - Fixed queryFunctions rule - completely rewritten to match intended purpose
@@ -155,7 +167,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.13
+            Version: v3.14
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>
