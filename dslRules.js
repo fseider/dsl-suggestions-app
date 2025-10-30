@@ -599,16 +599,45 @@ var DSL_RULES = [
                 return code;
             }
 
-            if (!suggestion.original || !suggestion.fixed) {
+            if (!suggestion.original) {
                 return code;
             }
+
+            // Get fixStyle (traditional or method)
+            // Check for forced form selection from UI
+            var fixStyle = (typeof window !== 'undefined' && window.__forceFormSelection) ||
+                          ruleConfig.fixStyle || 'traditional';
+            var template = ruleConfig.fixTemplates && ruleConfig.fixTemplates[fixStyle];
+
+            if (!template) {
+                // Fallback to traditional if template not found
+                template = 'ifNull({expression})';
+            }
+
+            // Extract object and property from original expression (object.property)
+            var parts = suggestion.original.split('.');
+            if (parts.length !== 2) {
+                return code; // Can't parse, return unchanged
+            }
+
+            var object = parts[0];
+            var property = parts[1];
+
+            // Replace placeholders in template
+            var defaultAltValue = ruleConfig.defaultAltValue || 'defaultValue';
+            var fixed = DSLRuleUtils.Message.replacePlaceholders(template, {
+                object: object,
+                property: property,
+                expression: suggestion.original,
+                defaultAltValue: defaultAltValue
+            });
 
             var originalPattern = new RegExp(
                 DSLRuleUtils.Regex.escape(suggestion.original),
                 'g'
             );
 
-            return code.replace(originalPattern, suggestion.fixed);
+            return code.replace(originalPattern, fixed);
         }
     },
 

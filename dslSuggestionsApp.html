@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.20
+ * VERSION: v3.21
  * LAST UPDATED: 2025-10-30
  * 
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -21,6 +21,17 @@
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
+ *
+ * v3.21 BUG FIX - AUTOFIX FUNCTIONALITY:
+ * - Fixed nullAccessProtection autofix not working in "Suggestions Applied" output
+ * - Issue: fix() function required suggestion.fixed property but check() never set it
+ * - Solution: Updated fix() to calculate fix from templates (like divisionOperations does)
+ * - fix() now gets fixStyle (traditional/method) from config or UI selection
+ * - Applies fixTemplates with placeholder replacement for {object}, {property}, {expression}, {defaultAltValue}
+ * - Traditional form: ifNull(xxDefQuote.imageList, ref, string, etc.)
+ * - Method form: (xxDefQuote.imageList).ifNull(ref, string, etc.)
+ * - Autofix now properly applies null protection to code
+ * - Changes: Rewrote nullAccessProtection fix() function in dslRules.js
  *
  * v3.20 UX IMPROVEMENT - CODE LINE COLOR CODING:
  * - Applied color coding to the code statements themselves, not just suggestions
@@ -235,7 +246,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.20
+            Version: v3.21
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>
