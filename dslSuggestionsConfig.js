@@ -41,9 +41,9 @@ var dslSuggestionsConfigData = {
       enabled: true,
       label: "Div By 0",
       description: "Detect division operations that may need zero protection",
-      suggestionType: "fixable",
-      suggestion: "Use ifNaN({expression}, 0.0) for Divide-By-Zero protection.",
-      autoFixEnabled: true,
+      suggestionType: "advisory",
+      suggestion: "Division detected in expression. Wrap entire formula with ifNaN({expression}, DEFAULT_VALUE) for Divide-By-Zero protection.",
+      autoFixEnabled: false,
       fixTemplates: {
         traditional: "ifNaN({expression}, {defaultAltValue})",
         method: "({expression}).ifNaN({defaultAltValue})"
@@ -91,9 +91,9 @@ var dslSuggestionsConfigData = {
       label: "Var Naming",
       description: "Enforce lowerCamelCase naming convention",
       severity: "info",
-      suggestionType: "fixable",
+      suggestionType: "advisory",
       suggestion: "Variable '{varName}' should use lowerCamelCase: '{correctedName}'.",
-      autoFixEnabled: true,
+      autoFixEnabled: false,
       fixTemplates: {
         traditional: "{correctedName}",
         method: "{correctedName}"
@@ -127,9 +127,9 @@ var dslSuggestionsConfigData = {
       enabled: true,
       label: "Null Safety",
       description: "Detect Node chains that may fail due to null/undefined values",
-      suggestionType: "fixable",
+      suggestionType: "advisory",
       suggestion: "Add null protection for **{object}** when accessing .{property}",
-      autoFixEnabled: true,
+      autoFixEnabled: false,
       fixStyle: "method",
       fixTemplates: {
         traditional: "ifNull({expression}, {defaultAltValue})",
@@ -152,7 +152,7 @@ var dslSuggestionsConfigData = {
       label: "Extraneous Block",
       description: "Detect unnecessary block statements with single content",
       severity: "info",
-      suggestionType: "fixable",
+      suggestionType: "advisory",
       suggestion: "Remove unnecessary block() wrapper for single statement.",
       autoFixEnabled: true
     }

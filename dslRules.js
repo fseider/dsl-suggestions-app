@@ -50,50 +50,55 @@ var DSL_RULES = [
             }
 
             var lineWithoutStrings = DSLRuleUtils.String.removeStringLiterals(line);
-            var divisionPattern = /([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\/(?!=)\s*([a-zA-Z_$][a-zA-Z0-9_$]*)/g;
+
+            // Find all division operators
+            var divisionPattern = /\/(?!=)/g;  // Match / but not /=
             var match;
+            var processedExpressions = {};  // Track already processed expressions
 
             while ((match = divisionPattern.exec(lineWithoutStrings)) !== null) {
-                var numerator = match[1];
-                var denominator = match[2];
-                var position = match.index;
+                var divPosition = match.index;
 
-                if (DSLRuleUtils.String.isInsideString(line, position)) {
+                if (DSLRuleUtils.String.isInsideString(line, divPosition)) {
                     continue;
                 }
 
-                // Check if division is already wrapped in a protection function
-                if (this._isAlreadyWrapped(lineWithoutStrings, match, ruleConfig)) {
+                // Extract the full expression containing this division
+                var expression = this._extractExpression(lineWithoutStrings, divPosition);
+
+                if (!expression || expression.trim() === '') {
+                    continue;
+                }
+
+                // Skip if we've already processed this expression
+                if (processedExpressions[expression]) {
+                    continue;
+                }
+                processedExpressions[expression] = true;
+
+                // Check if expression is already wrapped
+                if (this._isAlreadyWrapped(lineWithoutStrings, expression, ruleConfig)) {
                     continue;
                 }
 
                 var suggestionMsg = ruleConfig.suggestion ||
-                    'Division operation detected. Consider using ifNaN({numerator} / {denominator}, 0) to prevent division by zero errors.';
-
-                var expression = numerator + ' / ' + denominator;
+                    'Division operation detected. Consider using ifNaN({expression}, 0) to prevent division by zero errors.';
 
                 suggestionMsg = DSLRuleUtils.Message.replacePlaceholders(suggestionMsg, {
-                    numerator: numerator,
-                    denominator: denominator,
                     expression: expression
                 });
 
-                // Check if Traditional and Method forms are different
-                var hasDifferentForms = ruleConfig.fixTemplates &&
-                                        ruleConfig.fixTemplates.traditional !== ruleConfig.fixTemplates.method;
-
-                // Increment instance counter for this suggestion
+                // Increment instance counter
                 this._instanceCounter++;
 
                 suggestions.push({
                     line: lineNumber,
-                    column: position,
+                    column: divPosition,
                     message: suggestionMsg,
                     severity: ruleConfig.severity || 'warning',
                     rule: this.name,
                     label: ruleConfig.label || this.name,
                     fixable: ruleConfig.autoFixEnabled || false,
-                    hasDifferentForms: hasDifferentForms,
                     original: expression,
                     instanceNumber: this._instanceCounter
                 });
@@ -102,36 +107,50 @@ var DSL_RULES = [
             return suggestions;
         },
 
-        _isAlreadyWrapped: function(line, match, ruleConfig) {
+        _extractExpression: function(line, divPosition) {
+            // Delimiters that mark expression boundaries
+            var startDelimiters = ['=', ',', '('];
+            var endDelimiters = [',', ')'];
+
+            // Find start of expression (go backwards from division)
+            var start = 0;
+            for (var i = divPosition - 1; i >= 0; i--) {
+                var char = line.charAt(i);
+                if (startDelimiters.indexOf(char) !== -1) {
+                    start = i + 1;
+                    break;
+                }
+            }
+
+            // Find end of expression (go forwards from division)
+            var end = line.length;
+            for (var i = divPosition + 1; i < line.length; i++) {
+                var char = line.charAt(i);
+                if (endDelimiters.indexOf(char) !== -1) {
+                    end = i;
+                    break;
+                }
+            }
+
+            // Extract and trim the expression
+            var expression = line.substring(start, end).trim();
+            return expression;
+        },
+
+        _isAlreadyWrapped: function(line, expression, ruleConfig) {
             var skipFunctions = ruleConfig.skipIfWrappedIn || [];
             if (skipFunctions.length === 0) {
                 return false;
             }
 
-            var position = match.index;
-            var matchEnd = position + match[0].length;
-
-            // Check for traditional form: functionName(...division...)
-            // Look backward from the division to see if it's inside one of the wrapper functions
             for (var i = 0; i < skipFunctions.length; i++) {
                 var funcName = skipFunctions[i];
 
-                // Check for traditional form: ifNaN(x / y, 0)
-                var traditionalPattern = new RegExp(funcName + '\\s*\\([^)]*' + DSLRuleUtils.Regex.escape(match[0]));
-                if (traditionalPattern.test(line)) {
+                // Check if expression is wrapped: ifNaN(expression, ...)
+                var escapedExpression = DSLRuleUtils.Regex.escape(expression);
+                var wrappedPattern = new RegExp(funcName + '\\s*\\(\\s*' + escapedExpression);
+                if (wrappedPattern.test(line)) {
                     return true;
-                }
-
-                // Check for method form: (x / y).ifNaN(0)
-                // Look ahead from the division match to see if .funcName appears
-                var afterMatch = line.substring(matchEnd);
-                var methodPattern = new RegExp('^[^;\\n]*\\)\\s*\\.\\s*' + funcName + '\\s*\\(');
-                if (methodPattern.test(afterMatch)) {
-                    // Also verify we're inside parentheses before the division
-                    var beforeMatch = line.substring(0, position);
-                    if (/\(\s*$/.test(beforeMatch)) {
-                        return true;
-                    }
                 }
             }
 
