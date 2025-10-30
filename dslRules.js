@@ -329,13 +329,6 @@ var DSL_RULES = [
                 }
 
                 if (varName.indexOf('_') !== -1 || /^[A-Z]/.test(varName)) {
-                    var suggestionMsg = ruleConfig.suggestion ||
-                        'Variable "{varName}" should use camelCase naming convention';
-
-                    suggestionMsg = DSLRuleUtils.Message.replacePlaceholders(suggestionMsg, {
-                        varName: varName
-                    });
-
                     var camelCaseName = varName
                         .split('_')
                         .map(function(part, index) {
@@ -346,6 +339,14 @@ var DSL_RULES = [
                         })
                         .join('');
 
+                    var suggestionMsg = ruleConfig.suggestion ||
+                        'Variable "{varName}" should use camelCase naming convention';
+
+                    suggestionMsg = DSLRuleUtils.Message.replacePlaceholders(suggestionMsg, {
+                        varName: varName,
+                        correctedName: camelCaseName
+                    });
+
                     suggestions.push({
                         line: lineNumber,
                         column: position,
@@ -353,8 +354,7 @@ var DSL_RULES = [
                         severity: ruleConfig.severity || 'info',
                         rule: this.name,
                         fixable: ruleConfig.autoFixEnabled || false,
-                        original: varName,
-                        fixed: camelCaseName
+                        original: varName
                     });
                 }
             }
@@ -492,9 +492,12 @@ var DSL_RULES = [
                     var suggestionMsg = ruleConfig.suggestion ||
                         'Property access on "{object}" may fail if null/undefined. Consider using optional chaining ({object}?.{property}) or null check.';
 
+                    var expression = object + '.' + property;
+
                     suggestionMsg = DSLRuleUtils.Message.replacePlaceholders(suggestionMsg, {
                         object: object,
-                        property: property
+                        property: property,
+                        expression: expression
                     });
 
                     suggestions.push({
@@ -504,8 +507,7 @@ var DSL_RULES = [
                         severity: ruleConfig.severity || 'warning',
                         rule: this.name,
                         fixable: ruleConfig.autoFixEnabled || false,
-                        original: object + '.' + property,
-                        fixed: object + '?.' + property
+                        original: expression
                     });
                 }
             }

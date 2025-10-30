@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.11
+ * VERSION: v3.12
  * LAST UPDATED: 2025-10-30
  * 
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -21,6 +21,18 @@
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
+ *
+ * v3.12 BUG FIX (CRITICAL):
+ * - Fixed similar issues in nullAccessProtection and variableNaming rules
+ * - nullAccessProtection Issue 1: Missing {expression} placeholder replacement
+ * - nullAccessProtection Issue 2: Hardcoded fixed property bypassing fix() function
+ * - Added expression variable and {expression} to replacePlaceholders
+ * - Removed hardcoded fixed property (object + '?.' + property)
+ * - variableNaming Issue: Placeholder mismatch - config used {correctedNames} but rule replaced {varName}
+ * - Added {correctedName} to replacePlaceholders with camelCaseName value
+ * - Removed hardcoded fixed property from variableNaming
+ * - Updated config message to use both {varName} and {correctedName}
+ * - Both rules now use dynamic fix() function like divisionOperations
  *
  * v3.11 BUG FIX (CRITICAL):
  * - Fixed JavaScript number-to-string conversion losing .0 precision
@@ -131,7 +143,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.11
+            Version: v3.12
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>

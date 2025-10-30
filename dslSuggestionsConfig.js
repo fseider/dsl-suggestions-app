@@ -88,7 +88,7 @@ var dslSuggestionsConfigData = {
       description: "Enforce lowerCamelCase naming convention",
       severity: "info",
       suggestionType: "fixable",
-      suggestion: "Use lowerCamelCase: {correctedNames}.",
+      suggestion: "Variable '{varName}' should use lowerCamelCase: '{correctedName}'.",
       autoFixEnabled: true,
       fixTemplates: {
         traditional: "{correctedName}",
