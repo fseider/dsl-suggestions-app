@@ -1,7 +1,7 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.28
- * LAST UPDATED: 2025-10-30
+ * VERSION: v3.29
+ * LAST UPDATED: 2025-10-31
  *
  * ARTIFACT INFO (for proper Claude artifact creation):
  * - ID: dslSuggestionsApp.html
@@ -22,13 +22,25 @@
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
  *
+ * v3.29 ENHANCEMENT - ADD COLOR CODING TO QUERY FUNCTIONS:
+ * - Added instance counter to queryFunctions rule (Rule 2)
+ * - Each query function now gets a distinct color in HTML output
+ * - Color palette cycles through: Red, Blue, Green, Orange, Purple, Pink
+ * - Matches existing behavior of other rules (e.g., divisionOperations, nullAccessProtection)
+ * - Benefits:
+ *   - Easier to distinguish between multiple query functions in same code
+ *   - Visual consistency across all rules
+ *   - Better user experience when reviewing suggestions
+ * - Changes: Updated dslRules.js queryFunctions rule with _instanceCounter and instanceNumber
+ * - Created test-query-color-coding.dsl test file with complex query examples
+ *
  * v3.28 FIX - REMOVE IRRELEVANT PATTERNS FROM RULE 2 (QUERY FUNCTIONS):
  * - Removed inefficientPatterns from queryFunctions rule configuration
  * - Patterns (.filter().first(), .filter().count(), .map().filter()) had nothing to do with query-based functions
  * - Rule 2 now ONLY focuses on detecting query functions (averageQuery, countQuery, maxQuery, etc.)
  * - Suggests setting query functions as "One-Time / No-Copy" for performance
  * - Simplified rule implementation by removing SECONDARY FEATURE code block
- * - Cache-busting updated to v=3.28
+ * - Cache-busting updated to v=3.29
  *
  * v3.27 FIX - RESTORE DUAL FORM DISPLAY (TRADITIONAL AND METHOD):
  * - Added hasDifferentForms back to all 4 rules with fixTemplates
@@ -340,7 +352,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.28
+            Version: v3.29
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>
@@ -387,8 +399,8 @@
     - Faster page load: 4 HTTP requests instead of 10+
     -->
 
-    <script src="dslSuggestionsEngine.js?v=3.24" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
-    <script src="dslSuggestionsApp.js?v=3.24"></script>
+    <script src="dslSuggestionsEngine.js?v=3.29" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
+    <script src="dslSuggestionsApp.js?v=3.29"></script>
 
     <style>
         /* v3.00 - Simplified styles, removed all popup-related CSS */

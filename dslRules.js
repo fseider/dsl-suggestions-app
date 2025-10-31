@@ -227,9 +227,15 @@ var DSL_RULES = [
     {
         name: 'queryFunctions',
         version: 'v2.00',
+        _instanceCounter: 0,
 
         check: function(line, lineNumber, allLines, context, config) {
             var suggestions = [];
+
+            // Reset counter at start of new analysis
+            if (lineNumber === 1) {
+                this._instanceCounter = 0;
+            }
 
             if (context && context.isInComment) {
                 return suggestions;
@@ -266,6 +272,9 @@ var DSL_RULES = [
                         function: functionName
                     });
 
+                    // Increment instance counter
+                    this._instanceCounter++;
+
                     suggestions.push({
                         line: lineNumber,
                         column: position,
@@ -274,7 +283,8 @@ var DSL_RULES = [
                         rule: this.name,
                         label: ruleConfig.label || this.name,
                         fixable: false,
-                        original: functionName + '('
+                        original: functionName + '(',
+                        instanceNumber: this._instanceCounter
                     });
                 }
             }
