@@ -60,7 +60,7 @@ var dslSuggestionsConfigData = {
       description: "Query based functions impact performance. Should be set as One-Time / No-Copy",
       severity: "info",
       suggestionType: "advisory",
-      suggestion: "Ensure setting {function}() as \"One-Time / No-Copy\" for better performance.",
+      suggestion: "Ensure setting **{function}()** as \"One-Time / No-Copy\" for better performance.",
       functionNames: [
         "averageQuery",
         "countQuery",

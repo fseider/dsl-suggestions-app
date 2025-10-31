@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.29
+ * VERSION: v3.30
  * LAST UPDATED: 2025-10-31
  *
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -21,6 +21,15 @@
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
+ *
+ * v3.30 FIX - ENABLE COLOR HIGHLIGHTING FOR QUERY FUNCTIONS:
+ * - Added **markers** to query function names in suggestion message
+ * - Query function names now highlighted with colors in HTML output
+ * - Config change: suggestion message now wraps {function}() in ** markers
+ * - Enables color coding system to highlight function names
+ * - Each query function gets distinct color (Red, Blue, Green, Orange, Purple, Pink)
+ * - Fixed: suggestion: "Ensure setting **{function}()** as \"One-Time / No-Copy\""
+ * - Cache-busting updated to v=3.30
  *
  * v3.29 ENHANCEMENT - ADD COLOR CODING TO QUERY FUNCTIONS:
  * - Added instance counter to queryFunctions rule (Rule 2)
@@ -352,7 +361,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.29
+            Version: v3.30
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>
@@ -399,8 +408,8 @@
     - Faster page load: 4 HTTP requests instead of 10+
     -->
 
-    <script src="dslSuggestionsEngine.js?v=3.29" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
-    <script src="dslSuggestionsApp.js?v=3.29"></script>
+    <script src="dslSuggestionsEngine.js?v=3.30" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
+    <script src="dslSuggestionsApp.js?v=3.30"></script>
 
     <style>
         /* v3.00 - Simplified styles, removed all popup-related CSS */
