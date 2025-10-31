@@ -1,7 +1,5 @@
 /*
  * FILE: dslRuleUtilities.js
- * VERSION: v2.00
- * LAST UPDATED: 2025-10-29
  *
  * ARTIFACT INFO (for proper Claude artifact creation):
  * - ID: dslRuleUtilities.js
@@ -14,18 +12,8 @@
  *
  * DESCRIPTION:
  * Shared utility functions for DSL suggestion rules.
- * OPTIMIZED v2.00: Trimmed from 440 lines to ~120 lines by keeping only
- * the functions actually used by rules. Removed unused categories:
- * - Pattern utilities (extractPropertyChain, etc.)
- * - Validation utilities (validateBoolean, etc.)
- * - Performance utilities (regex cache)
- * - Comment utilities (not used in current rules)
- *
- * OPTIMIZATION BENEFITS:
- * - 73% size reduction (440 → 120 lines)
- * - Faster to parse and load
- * - Easier to understand and maintain
- * - Only includes what rules actually use
+ * Trimmed from 440 lines to ~120 lines by keeping only the functions actually used.
+ * Version tracking: See dslSuggestionsApp.html for app version.
  */
 
 var DSLRuleUtils = {

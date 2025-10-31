@@ -38,6 +38,9 @@ function dslSuggestionsAppVersion() {
 // v2.09 - Store original suggestions for filtering
 var originalSuggestions = '';
 
+// v3.03 - Store original input code for reapplying with different forms
+var originalInputCode = '';
+
 // v2.13 - Store last valid checkbox state
 var lastCheckboxState = {
     traditional: true,
@@ -257,49 +260,253 @@ function handleScriptError(scriptName) {
 // Main function to get suggestions and populate outputs
 function getSuggestions() {
     var code = document.getElementById('suggestionInput').value;
-    
+
     if (!code.trim()) {
         alert('Please enter some code to analyze.');
         return;
     }
-    
-    // v2.09 - Reset original suggestions when getting new ones
-    originalSuggestions = '';
-    
+
+    // v3.03 - Store original input code for reapplying with different forms
+    originalInputCode = code;
+
     try {
-        // Generate suggestions using the engine
+        // Generate suggestions showing BOTH forms
         if (typeof generateCodeSuggestions === 'function') {
-            var suggestions = generateCodeSuggestions(code);
-            // v2.07: Use helper function for div/textarea compatibility
+            var suggestions = generateSuggestionsWithBothForms(code);
             setElementContent('suggestionOutput', suggestions);
-            
-            // v2.09 - Store original suggestions
-            originalSuggestions = suggestions;
-            
-            // v2.09 - Apply form filtering if needed
-            updateSuggestionDisplay();
+
+            // Also generate HTML version with color coding
+            var htmlSuggestions = generateSuggestionsWithColorCoding(code);
+            document.getElementById('htmlOutput').innerHTML = htmlSuggestions;
         } else {
-            // v2.07: Use helper function for div/textarea compatibility
             setElementContent('suggestionOutput', 'Suggestions functionality not loaded.');
+            document.getElementById('htmlOutput').innerHTML = 'Suggestions functionality not loaded.';
         }
-        
-        // Apply auto-fixes 
-        // v2.08 - Simplified to just display whatever the engine returns
-        if (typeof applyCodeSuggestions === 'function') {
-            var appliedSuggestions = applyCodeSuggestions(code);
-            
-            // v2.08 - Just display whatever the engine returns - no interference
-            setElementContent('suggestionsApplied', appliedSuggestions);
-            
-        } else {
-            // v2.07: Use helper function for div/textarea compatibility
-            setElementContent('suggestionsApplied', 'Auto-apply functionality not loaded.');
-        }
-        
+
+        // Generate applied suggestions with selected form
+        updateAppliedSuggestions();
+
     } catch (error) {
         console.error('Error in getSuggestions:', error);
         alert('Error generating suggestions: ' + error.message);
     }
+}
+
+// v3.03 - Generate suggestions showing both Traditional and Method forms
+function generateSuggestionsWithBothForms(code) {
+    if (!code || typeof analyzeDSL !== 'function') {
+        return 'Analysis functionality not loaded.';
+    }
+
+    // Get raw analysis results
+    var analysis = analyzeDSL(code);
+    if (!analysis || !analysis.suggestions || analysis.suggestions.length === 0) {
+        return 'No suggestions found. Code looks good!';
+    }
+
+    // Build output showing both forms
+    var lines = code.split('\n');
+    var result = [];
+
+    for (var i = 0; i < lines.length; i++) {
+        result.push(lines[i]);
+
+        // Find suggestions for this line
+        var lineSuggestions = analysis.suggestions.filter(function(s) {
+            return s.line === i + 1;
+        });
+
+        // For each suggestion, show based on whether it's fixable and has different forms
+        for (var j = 0; j < lineSuggestions.length; j++) {
+            var suggestion = lineSuggestions[j];
+            var indent = getIndent(lines[i]);
+            var label = suggestion.label || suggestion.rule || 'General';
+
+            if (suggestion.fixable && suggestion.hasDifferentForms) {
+                // Fixable rules with different Traditional/Method forms
+                result.push(indent + '/* SUGGESTION - ' + label + ' (Traditional): ' + suggestion.message + ' */');
+                result.push(indent + '/* SUGGESTION - ' + label + ' (Method): ' + suggestion.message + ' */');
+            } else {
+                // Advisory rules OR fixable rules with single form
+                result.push(indent + '/* SUGGESTION - ' + label + ': ' + suggestion.message + ' */');
+            }
+        }
+    }
+
+    return result.join('\n');
+}
+
+// v3.20 - Generate suggestions with HTML color coding and distinct colors per rule instance
+function generateSuggestionsWithColorCoding(code) {
+    if (!code || typeof analyzeDSL !== 'function') {
+        return 'Analysis functionality not loaded.';
+    }
+
+    // Get raw analysis results
+    var analysis = analyzeDSL(code);
+    if (!analysis || !analysis.suggestions || analysis.suggestions.length === 0) {
+        return 'No suggestions found. Code looks good!';
+    }
+
+    // Helper function to escape HTML
+    function escapeHtml(text) {
+        var map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
+
+    // Helper function to convert **text** to colored spans with specific color
+    function highlightObjects(text, colorIndex) {
+        return text.replace(/\*\*([^*]+)\*\*/g, '<span class="highlight-object-' + colorIndex + '">$1</span>');
+    }
+
+    // Helper function to extract objects from **markers** in text
+    function extractHighlightedObjects(text) {
+        var objects = [];
+        var regex = /\*\*([^*]+)\*\*/g;
+        var match;
+        while ((match = regex.exec(text)) !== null) {
+            objects.push(match[1]);
+        }
+        return objects;
+    }
+
+    // Helper function to colorize code line with object->color mapping
+    function colorizeCodeLine(line, objectColorMap) {
+        var escapedLine = escapeHtml(line);
+
+        // Sort objects by length (longest first) to avoid partial replacements
+        var objectsToReplace = Object.keys(objectColorMap).sort(function(a, b) {
+            return b.length - a.length;
+        });
+
+        for (var i = 0; i < objectsToReplace.length; i++) {
+            var obj = objectsToReplace[i];
+            var colorIndex = objectColorMap[obj];
+
+            // Create a regex that matches the object as a whole word (with word boundaries)
+            var regex = new RegExp('\\b' + obj.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'g');
+            escapedLine = escapedLine.replace(regex, '<span class="highlight-object-' + colorIndex + '">' + obj + '</span>');
+        }
+
+        return escapedLine;
+    }
+
+    // Track rule instance counts for color cycling
+    var ruleInstanceCount = {};
+
+    // Build output showing both forms with color coding
+    var lines = code.split('\n');
+    var result = [];
+
+    for (var i = 0; i < lines.length; i++) {
+        // Find suggestions for this line
+        var lineSuggestions = analysis.suggestions.filter(function(s) {
+            return s.line === i + 1;
+        });
+
+        // Build object -> color mapping for this line
+        var objectColorMap = {};
+        var suggestionData = [];
+
+        for (var j = 0; j < lineSuggestions.length; j++) {
+            var suggestion = lineSuggestions[j];
+            var ruleName = suggestion.rule || 'unknown';
+
+            // Track instance count for this rule
+            if (!ruleInstanceCount[ruleName]) {
+                ruleInstanceCount[ruleName] = 0;
+            }
+            ruleInstanceCount[ruleName]++;
+
+            // Calculate color index (cycle through 6 colors: 1-6)
+            var colorIndex = ((ruleInstanceCount[ruleName] - 1) % 6) + 1;
+
+            // Extract highlighted objects from the message
+            var highlightedObjects = extractHighlightedObjects(suggestion.message);
+            for (var k = 0; k < highlightedObjects.length; k++) {
+                objectColorMap[highlightedObjects[k]] = colorIndex;
+            }
+
+            // Store suggestion data for later output
+            suggestionData.push({
+                suggestion: suggestion,
+                colorIndex: colorIndex
+            });
+        }
+
+        // Output the code line with color coding
+        result.push(colorizeCodeLine(lines[i], objectColorMap));
+
+        // Output the suggestions
+        for (var j = 0; j < suggestionData.length; j++) {
+            var data = suggestionData[j];
+            var suggestion = data.suggestion;
+            var colorIndex = data.colorIndex;
+            var indent = getIndent(lines[i]);
+            var label = suggestion.label || suggestion.rule || 'General';
+
+            // Escape HTML but preserve ** markers for highlighting
+            var message = escapeHtml(suggestion.message);
+            message = highlightObjects(message, colorIndex);
+
+            if (suggestion.fixable && suggestion.hasDifferentForms) {
+                // Fixable rules with different Traditional/Method forms
+                result.push(indent + '/* SUGGESTION - ' + label + ' (Traditional): ' + message + ' */');
+                result.push(indent + '/* SUGGESTION - ' + label + ' (Method): ' + message + ' */');
+            } else {
+                // Advisory rules OR fixable rules with single form
+                result.push(indent + '/* SUGGESTION - ' + label + ': ' + message + ' */');
+            }
+        }
+    }
+
+    return result.join('\n');
+}
+
+// v3.03 - Update applied suggestions based on selected form
+function updateAppliedSuggestions() {
+    if (!originalInputCode) {
+        return;
+    }
+
+    try {
+        // Get selected form
+        var traditionalRadio = document.getElementById('showTraditionalForm');
+        var selectedForm = (traditionalRadio && traditionalRadio.checked) ? 'traditional' : 'method';
+
+        // Set form selection for engine to use
+        if (typeof window !== 'undefined') {
+            window.__forceFormSelection = selectedForm;
+        }
+
+        // Apply auto-fixes with selected form
+        if (typeof applyCodeSuggestions === 'function') {
+            var appliedSuggestions = applyCodeSuggestions(originalInputCode);
+            setElementContent('suggestionsApplied', appliedSuggestions);
+        } else {
+            setElementContent('suggestionsApplied', 'Auto-apply functionality not loaded.');
+        }
+
+        // Clear form selection override
+        if (typeof window !== 'undefined') {
+            delete window.__forceFormSelection;
+        }
+
+    } catch (error) {
+        console.error('Error updating applied suggestions:', error);
+    }
+}
+
+// Helper function to get line indentation
+function getIndent(line) {
+    var match = line.match(/^(\s*)/);
+    return match ? match[1] : '';
 }
 
 // Debug function to test extraneousBlock detection specifically
@@ -450,7 +657,9 @@ function clearSuggestionInput() {
     // v2.07: Use helper function for div/textarea compatibility
     setElementContent('suggestionOutput', '');
     setElementContent('suggestionsApplied', '');
-    
+    // v3.18: Clear HTML output
+    document.getElementById('htmlOutput').innerHTML = '';
+
     // v2.09 - Clear original suggestions
     originalSuggestions = '';
     // v2.14 - Clear original applied suggestions
@@ -573,6 +782,7 @@ document.addEventListener('DOMContentLoaded', function() {
 if (typeof window !== 'undefined') {
     window.updateSuggestionDisplay = updateSuggestionDisplay;
     window.regenerateAppliedSuggestions = regenerateAppliedSuggestions;
+    window.updateAppliedSuggestions = updateAppliedSuggestions;  // v3.03 - New function for radio control
     window.getSuggestions = getSuggestions;
     window.clearSuggestionInput = clearSuggestionInput;
     window.copyToClipboard = copyToClipboard;

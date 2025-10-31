@@ -1,6 +1,6 @@
 /*
  * FILE: dslRules.js
- * VERSION: v1.00
+ * VERSION: v1.01
  * LAST UPDATED: 2025-10-29
  *
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -29,9 +29,15 @@ var DSL_RULES = [
     {
         name: 'divisionOperations',
         version: 'v2.00',
+        _instanceCounter: 0,
 
         check: function(line, lineNumber, allLines, context, config) {
             var suggestions = [];
+
+            // Reset counter at start of new analysis
+            if (lineNumber === 1) {
+                this._instanceCounter = 0;
+            }
 
             if (context && context.isInComment) {
                 return suggestions;
@@ -44,39 +50,116 @@ var DSL_RULES = [
             }
 
             var lineWithoutStrings = DSLRuleUtils.String.removeStringLiterals(line);
-            var divisionPattern = /([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\/(?!=)\s*([a-zA-Z_$][a-zA-Z0-9_$]*)/g;
+
+            // Find all division operators
+            var divisionPattern = /\/(?!=)/g;  // Match / but not /=
             var match;
+            var processedExpressions = {};  // Track already processed expressions
 
             while ((match = divisionPattern.exec(lineWithoutStrings)) !== null) {
-                var numerator = match[1];
-                var denominator = match[2];
-                var position = match.index;
+                var divPosition = match.index;
 
-                if (DSLRuleUtils.String.isInsideString(line, position)) {
+                if (DSLRuleUtils.String.isInsideString(line, divPosition)) {
+                    continue;
+                }
+
+                // Extract the full expression containing this division
+                var expression = this._extractExpression(lineWithoutStrings, divPosition);
+
+                if (!expression || expression.trim() === '') {
+                    continue;
+                }
+
+                // Skip if we've already processed this expression
+                if (processedExpressions[expression]) {
+                    continue;
+                }
+                processedExpressions[expression] = true;
+
+                // Check if expression is already wrapped
+                if (this._isAlreadyWrapped(lineWithoutStrings, expression, ruleConfig)) {
                     continue;
                 }
 
                 var suggestionMsg = ruleConfig.suggestion ||
-                    'Division operation detected. Consider using ifNaN({numerator} / {denominator}, 0) to prevent division by zero errors.';
+                    'Division operation detected. Consider using ifNaN({expression}, 0) to prevent division by zero errors.';
 
                 suggestionMsg = DSLRuleUtils.Message.replacePlaceholders(suggestionMsg, {
-                    numerator: numerator,
-                    denominator: denominator
+                    expression: expression
                 });
+
+                // Increment instance counter
+                this._instanceCounter++;
+
+                // Check if this rule has different forms (Traditional vs Method)
+                var hasDifferentForms = ruleConfig.fixTemplates &&
+                                       ruleConfig.fixTemplates.traditional !== ruleConfig.fixTemplates.method;
 
                 suggestions.push({
                     line: lineNumber,
-                    column: position,
+                    column: divPosition,
                     message: suggestionMsg,
                     severity: ruleConfig.severity || 'warning',
                     rule: this.name,
-                    fixable: ruleConfig.autoFixEnabled || false,
-                    original: numerator + ' / ' + denominator,
-                    fixed: 'ifNaN(' + numerator + ' / ' + denominator + ', 0)'
+                    label: ruleConfig.label || this.name,
+                    fixable: true,  // Show as fixable for display purposes (shows both forms)
+                    hasDifferentForms: hasDifferentForms,
+                    original: expression,
+                    instanceNumber: this._instanceCounter
                 });
             }
 
             return suggestions;
+        },
+
+        _extractExpression: function(line, divPosition) {
+            // Delimiters that mark expression boundaries
+            var startDelimiters = ['=', ',', '('];
+            var endDelimiters = [',', ')'];
+
+            // Find start of expression (go backwards from division)
+            var start = 0;
+            for (var i = divPosition - 1; i >= 0; i--) {
+                var char = line.charAt(i);
+                if (startDelimiters.indexOf(char) !== -1) {
+                    start = i + 1;
+                    break;
+                }
+            }
+
+            // Find end of expression (go forwards from division)
+            var end = line.length;
+            for (var i = divPosition + 1; i < line.length; i++) {
+                var char = line.charAt(i);
+                if (endDelimiters.indexOf(char) !== -1) {
+                    end = i;
+                    break;
+                }
+            }
+
+            // Extract and trim the expression
+            var expression = line.substring(start, end).trim();
+            return expression;
+        },
+
+        _isAlreadyWrapped: function(line, expression, ruleConfig) {
+            var skipFunctions = ruleConfig.skipIfWrappedIn || [];
+            if (skipFunctions.length === 0) {
+                return false;
+            }
+
+            for (var i = 0; i < skipFunctions.length; i++) {
+                var funcName = skipFunctions[i];
+
+                // Check if expression is wrapped: ifNaN(expression, ...)
+                var escapedExpression = DSLRuleUtils.Regex.escape(expression);
+                var wrappedPattern = new RegExp(funcName + '\\s*\\(\\s*' + escapedExpression);
+                if (wrappedPattern.test(line)) {
+                    return true;
+                }
+            }
+
+            return false;
         },
 
         fix: function(code, suggestion, config) {
@@ -86,16 +169,57 @@ var DSL_RULES = [
                 return code;
             }
 
-            if (!suggestion.original || !suggestion.fixed) {
+            if (!suggestion.original) {
                 return code;
             }
 
-            var originalPattern = new RegExp(
-                DSLRuleUtils.Regex.escape(suggestion.original),
-                'g'
-            );
+            // Get fixStyle (traditional or method)
+            var fixStyle = ruleConfig.fixStyle || 'traditional';
+            var template = ruleConfig.fixTemplates && ruleConfig.fixTemplates[fixStyle];
 
-            return code.replace(originalPattern, suggestion.fixed);
+            if (!template) {
+                // Fallback to traditional if template not found
+                template = 'ifNaN({expression}, {defaultAltValue})';
+            }
+
+            // Generate fixed code based on template with sequenced placeholder
+            var instanceNum = suggestion.instanceNumber || 1;
+            var defaultValue = 'DEF_VAL_DIV_BY_ZERO_' + instanceNum;
+            var fixedCode = template
+                .replace('{expression}', suggestion.original)
+                .replace('{defaultAltValue}', defaultValue);
+
+            // Process line by line to avoid double-wrapping when multiple identical expressions exist
+            var lines = code.split('\n');
+            var modified = false;
+
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i];
+                var pattern = new RegExp(DSLRuleUtils.Regex.escape(suggestion.original), 'g');
+                var match;
+                var newLine = '';
+                var lastIndex = 0;
+
+                while ((match = pattern.exec(line)) !== null) {
+                    // Check if this specific occurrence is already wrapped
+                    if (!this._isAlreadyWrapped(line, match, ruleConfig)) {
+                        // Replace this occurrence
+                        newLine += line.substring(lastIndex, match.index) + fixedCode;
+                        lastIndex = match.index + match[0].length;
+                        modified = true;
+                    } else {
+                        // Keep the original (it's already wrapped)
+                        newLine += line.substring(lastIndex, match.index + match[0].length);
+                        lastIndex = match.index + match[0].length;
+                    }
+                }
+
+                // Add the rest of the line
+                newLine += line.substring(lastIndex);
+                lines[i] = newLine;
+            }
+
+            return lines.join('\n');
         }
     },
 
@@ -103,15 +227,21 @@ var DSL_RULES = [
     {
         name: 'queryFunctions',
         version: 'v2.00',
+        _instanceCounter: 0,
 
         check: function(line, lineNumber, allLines, context, config) {
             var suggestions = [];
+
+            // Reset counter at start of new analysis
+            if (lineNumber === 1) {
+                this._instanceCounter = 0;
+            }
 
             if (context && context.isInComment) {
                 return suggestions;
             }
 
-            var ruleConfig = config.suggestionRules.queryFunctionsRule;
+            var ruleConfig = config.suggestionRules.queryFunctions;
 
             if (!ruleConfig || !ruleConfig.enabled) {
                 return suggestions;
@@ -119,31 +249,42 @@ var DSL_RULES = [
 
             var lineWithoutStrings = DSLRuleUtils.String.removeStringLiterals(line);
 
-            var inefficientPatterns = ruleConfig.inefficientPatterns || [
-                { pattern: /\.filter\([^)]+\)\.first\(\)/g, suggestion: 'Use .findFirst() instead of .filter().first()' },
-                { pattern: /\.filter\([^)]+\)\.count\(\)/g, suggestion: 'Use .count() with condition instead of .filter().count()' },
-                { pattern: /\.map\([^)]+\)\.filter\([^)]+\)/g, suggestion: 'Consider combining or reordering .map() and .filter()' }
-            ];
-
-            for (var i = 0; i < inefficientPatterns.length; i++) {
-                var patternConfig = inefficientPatterns[i];
+            // Check for query function names
+            var functionNames = ruleConfig.functionNames || [];
+            if (functionNames.length > 0) {
+                // Build regex pattern: \b(func1|func2|func3)\s*\(
+                var funcPattern = '\\b(' + functionNames.join('|') + ')\\s*\\(';
+                var functionRegex = new RegExp(funcPattern, 'g');
                 var match;
 
-                while ((match = patternConfig.pattern.exec(lineWithoutStrings)) !== null) {
+                while ((match = functionRegex.exec(lineWithoutStrings)) !== null) {
+                    var functionName = match[1];
                     var position = match.index;
 
                     if (DSLRuleUtils.String.isInsideString(line, position)) {
                         continue;
                     }
 
+                    var suggestionMsg = ruleConfig.suggestion ||
+                        'Consider setting {function}() as "One-Time" for better performance.';
+
+                    suggestionMsg = DSLRuleUtils.Message.replacePlaceholders(suggestionMsg, {
+                        function: functionName
+                    });
+
+                    // Increment instance counter
+                    this._instanceCounter++;
+
                     suggestions.push({
                         line: lineNumber,
                         column: position,
-                        message: patternConfig.suggestion,
+                        message: suggestionMsg,
                         severity: ruleConfig.severity || 'info',
                         rule: this.name,
+                        label: ruleConfig.label || this.name,
                         fixable: false,
-                        original: match[0]
+                        original: functionName + '(',
+                        instanceNumber: this._instanceCounter
                     });
                 }
             }
@@ -168,7 +309,7 @@ var DSL_RULES = [
                 return suggestions;
             }
 
-            var ruleConfig = config.suggestionRules.uniqueKeyRule;
+            var ruleConfig = config.suggestionRules.uniqueKey;
 
             if (!ruleConfig || !ruleConfig.enabled) {
                 return suggestions;
@@ -201,6 +342,7 @@ var DSL_RULES = [
                         message: suggestionMsg,
                         severity: ruleConfig.severity || 'warning',
                         rule: this.name,
+                        label: ruleConfig.label || this.name,
                         fixable: false,
                         original: 'UniqueKey: ' + keyField
                     });
@@ -227,7 +369,7 @@ var DSL_RULES = [
                 return suggestions;
             }
 
-            var ruleConfig = config.suggestionRules.variableNamingRule;
+            var ruleConfig = config.suggestionRules.variableNaming;
 
             if (!ruleConfig || !ruleConfig.enabled) {
                 return suggestions;
@@ -246,13 +388,6 @@ var DSL_RULES = [
                 }
 
                 if (varName.indexOf('_') !== -1 || /^[A-Z]/.test(varName)) {
-                    var suggestionMsg = ruleConfig.suggestion ||
-                        'Variable "{varName}" should use camelCase naming convention';
-
-                    suggestionMsg = DSLRuleUtils.Message.replacePlaceholders(suggestionMsg, {
-                        varName: varName
-                    });
-
                     var camelCaseName = varName
                         .split('_')
                         .map(function(part, index) {
@@ -263,15 +398,28 @@ var DSL_RULES = [
                         })
                         .join('');
 
+                    var suggestionMsg = ruleConfig.suggestion ||
+                        'Variable "{varName}" should use camelCase naming convention';
+
+                    suggestionMsg = DSLRuleUtils.Message.replacePlaceholders(suggestionMsg, {
+                        varName: varName,
+                        correctedName: camelCaseName
+                    });
+
+                    // Check if this rule has different forms (Traditional vs Method)
+                    var hasDifferentForms = ruleConfig.fixTemplates &&
+                                           ruleConfig.fixTemplates.traditional !== ruleConfig.fixTemplates.method;
+
                     suggestions.push({
                         line: lineNumber,
                         column: position,
                         message: suggestionMsg,
                         severity: ruleConfig.severity || 'info',
                         rule: this.name,
-                        fixable: ruleConfig.autoFixEnabled || false,
-                        original: varName,
-                        fixed: camelCaseName
+                        label: ruleConfig.label || this.name,
+                        fixable: true,  // Show as fixable for display purposes (shows both forms)
+                        hasDifferentForms: hasDifferentForms,
+                        original: varName
                     });
                 }
             }
@@ -280,7 +428,7 @@ var DSL_RULES = [
         },
 
         fix: function(code, suggestion, config) {
-            var ruleConfig = config.suggestionRules.variableNamingRule;
+            var ruleConfig = config.suggestionRules.variableNaming;
 
             if (!ruleConfig || !ruleConfig.autoFixEnabled) {
                 return code;
@@ -311,7 +459,7 @@ var DSL_RULES = [
                 return suggestions;
             }
 
-            var ruleConfig = config.suggestionRules.nonOptimalNodeAccessRule;
+            var ruleConfig = config.suggestionRules.nonOptimalNodeAccess;
 
             if (!ruleConfig || !ruleConfig.enabled) {
                 return suggestions;
@@ -336,6 +484,7 @@ var DSL_RULES = [
                     message: suggestionMsg,
                     severity: ruleConfig.severity || 'info',
                     rule: this.name,
+                    label: ruleConfig.label || this.name,
                     fixable: false,
                     original: node.fullMatch
                 });
@@ -375,15 +524,21 @@ var DSL_RULES = [
     {
         name: 'nullAccessProtection',
         version: 'v2.00',
+        _instanceCounter: 0,
 
         check: function(line, lineNumber, allLines, context, config) {
             var suggestions = [];
+
+            // Reset counter at start of new analysis
+            if (lineNumber === 1) {
+                this._instanceCounter = 0;
+            }
 
             if (context && context.isInComment) {
                 return suggestions;
             }
 
-            var ruleConfig = config.suggestionRules.nullAccessProtectionRule;
+            var ruleConfig = config.suggestionRules.nullAccessProtection;
 
             if (!ruleConfig || !ruleConfig.enabled) {
                 return suggestions;
@@ -402,6 +557,13 @@ var DSL_RULES = [
                     continue;
                 }
 
+                // Skip if this is a function call (property followed by opening parenthesis)
+                var matchEnd = position + match[0].length;
+                var nextChar = lineWithoutStrings.charAt(matchEnd);
+                if (nextChar === '(') {
+                    continue; // This is a function call, not a property access concern
+                }
+
                 var hasOptionalChaining = lineWithoutStrings.indexOf(object + '?.') !== -1;
                 var hasNullCheck = this._hasNullCheck(lineWithoutStrings, object);
 
@@ -409,10 +571,20 @@ var DSL_RULES = [
                     var suggestionMsg = ruleConfig.suggestion ||
                         'Property access on "{object}" may fail if null/undefined. Consider using optional chaining ({object}?.{property}) or null check.';
 
+                    var expression = object + '.' + property;
+
                     suggestionMsg = DSLRuleUtils.Message.replacePlaceholders(suggestionMsg, {
                         object: object,
-                        property: property
+                        property: property,
+                        expression: expression
                     });
+
+                    // Increment instance counter for this suggestion
+                    this._instanceCounter++;
+
+                    // Check if this rule has different forms (Traditional vs Method)
+                    var hasDifferentForms = ruleConfig.fixTemplates &&
+                                           ruleConfig.fixTemplates.traditional !== ruleConfig.fixTemplates.method;
 
                     suggestions.push({
                         line: lineNumber,
@@ -420,9 +592,11 @@ var DSL_RULES = [
                         message: suggestionMsg,
                         severity: ruleConfig.severity || 'warning',
                         rule: this.name,
-                        fixable: ruleConfig.autoFixEnabled || false,
-                        original: object + '.' + property,
-                        fixed: object + '?.' + property
+                        label: ruleConfig.label || this.name,
+                        fixable: true,  // Show as fixable for display purposes (shows both forms)
+                        hasDifferentForms: hasDifferentForms,
+                        original: expression,
+                        instanceNumber: this._instanceCounter
                     });
                 }
             }
@@ -447,23 +621,111 @@ var DSL_RULES = [
             return false;
         },
 
+        _getSmartDefaultValue: function(property) {
+            // Smart default value detection based on property name patterns
+            var propertyLower = property.toLowerCase();
+
+            // String patterns
+            var stringPatterns = ['name', 'label', 'title', 'text', 'description', 'message', 'content', 'string', 'str'];
+            for (var i = 0; i < stringPatterns.length; i++) {
+                if (propertyLower.indexOf(stringPatterns[i]) !== -1) {
+                    return '""';
+                }
+            }
+
+            // Numeric patterns
+            var numericPatterns = ['count', 'number', 'index', 'size', 'length', 'id', 'quantity', 'total'];
+            for (var i = 0; i < numericPatterns.length; i++) {
+                if (propertyLower.indexOf(numericPatterns[i]) !== -1) {
+                    return '0';
+                }
+            }
+
+            // Array patterns
+            var arrayPatterns = ['list', 'array', 'items', 'elements', 'collection'];
+            for (var i = 0; i < arrayPatterns.length; i++) {
+                if (propertyLower.indexOf(arrayPatterns[i]) !== -1) {
+                    return '[]';
+                }
+            }
+
+            // Object patterns
+            var objectPatterns = ['map', 'dict', 'object', 'data', 'config', 'settings'];
+            for (var i = 0; i < objectPatterns.length; i++) {
+                if (propertyLower.indexOf(objectPatterns[i]) !== -1) {
+                    return '{}';
+                }
+            }
+
+            // Boolean patterns
+            var booleanPatterns = ['flag', 'is', 'has', 'should', 'can', 'enabled', 'active'];
+            for (var i = 0; i < booleanPatterns.length; i++) {
+                if (propertyLower.indexOf(booleanPatterns[i]) !== -1) {
+                    return 'false';
+                }
+            }
+
+            // Date/Time patterns - return null
+            var nullPatterns = ['date', 'time', 'timestamp'];
+            for (var i = 0; i < nullPatterns.length; i++) {
+                if (propertyLower.indexOf(nullPatterns[i]) !== -1) {
+                    return 'null';
+                }
+            }
+
+            // Default fallback
+            return 'null';
+        },
+
         fix: function(code, suggestion, config) {
-            var ruleConfig = config.suggestionRules.nullAccessProtectionRule;
+            var ruleConfig = config.suggestionRules.nullAccessProtection;
 
             if (!ruleConfig || !ruleConfig.autoFixEnabled) {
                 return code;
             }
 
-            if (!suggestion.original || !suggestion.fixed) {
+            if (!suggestion.original) {
                 return code;
             }
+
+            // Get fixStyle (traditional or method)
+            // Check for forced form selection from UI
+            var fixStyle = (typeof window !== 'undefined' && window.__forceFormSelection) ||
+                          ruleConfig.fixStyle || 'traditional';
+            var template = ruleConfig.fixTemplates && ruleConfig.fixTemplates[fixStyle];
+
+            if (!template) {
+                // Fallback to traditional if template not found
+                template = 'ifNull({expression})';
+            }
+
+            // Extract object and property from original expression (object.property)
+            var parts = suggestion.original.split('.');
+            if (parts.length !== 2) {
+                return code; // Can't parse, return unchanged
+            }
+
+            var object = parts[0];
+            var property = parts[1];
+
+            // Use rule-specific sequenced placeholder
+            var instanceNum = suggestion.instanceNumber || 1;
+            var defaultAltValue = 'DEF_VAL_NULL_SAFETY_' + instanceNum;
+
+            // Replace placeholders in template
+            var fixed = DSLRuleUtils.Message.replacePlaceholders(template, {
+                object: object,
+                property: property,
+                expression: suggestion.original,
+                defaultAltValue: defaultAltValue
+            });
 
             var originalPattern = new RegExp(
                 DSLRuleUtils.Regex.escape(suggestion.original),
                 'g'
             );
 
-            return code.replace(originalPattern, suggestion.fixed);
+            return code.replace(originalPattern, fixed);
         }
     },
 
@@ -479,7 +741,7 @@ var DSL_RULES = [
                 return suggestions;
             }
 
-            var ruleConfig = config.suggestionRules.mathOperationsParensRule;
+            var ruleConfig = config.suggestionRules.mathOperationsParens;
 
             if (!ruleConfig || !ruleConfig.enabled) {
                 return suggestions;
@@ -511,9 +773,9 @@ var DSL_RULES = [
                         message: suggestionMsg,
                         severity: ruleConfig.severity || 'info',
                         rule: this.name,
+                        label: ruleConfig.label || this.name,
                         fixable: ruleConfig.autoFixEnabled || false,
-                        original: original,
-                        fixed: fixed
+                        original: original
                     });
                 }
             }
@@ -529,7 +791,7 @@ var DSL_RULES = [
         },
 
         fix: function(code, suggestion, config) {
-            var ruleConfig = config.suggestionRules.mathOperationsParensRule;
+            var ruleConfig = config.suggestionRules.mathOperationsParens;
 
             if (!ruleConfig || !ruleConfig.autoFixEnabled) {
                 return code;
@@ -560,7 +822,7 @@ var DSL_RULES = [
                 return suggestions;
             }
 
-            var ruleConfig = config.suggestionRules.extraneousBlocksRule;
+            var ruleConfig = config.suggestionRules.extraneousBlocks;
 
             if (!ruleConfig || !ruleConfig.enabled) {
                 return suggestions;
@@ -577,13 +839,19 @@ var DSL_RULES = [
                     var suggestionMsg = ruleConfig.suggestion ||
                         'Unnecessary block detected. Single statement does not require braces.';
 
+                    // Check if this rule has different forms (Traditional vs Method)
+                    var hasDifferentForms = ruleConfig.fixTemplates &&
+                                           ruleConfig.fixTemplates.traditional !== ruleConfig.fixTemplates.method;
+
                     suggestions.push({
                         line: lineNumber,
                         column: 0,
                         message: suggestionMsg,
                         severity: ruleConfig.severity || 'info',
                         rule: this.name,
-                        fixable: false
+                        label: ruleConfig.label || this.name,
+                        fixable: true,  // Show as fixable for display purposes (shows both forms)
+                        hasDifferentForms: hasDifferentForms
                     });
                 }
             }
@@ -591,13 +859,19 @@ var DSL_RULES = [
             if (trimmedLine === '{}' || (trimmedLine === '{' && lineNumber < allLines.length && allLines[lineNumber].trim() === '}')) {
                 var suggestionMsg = ruleConfig.suggestion || 'Empty block detected. Consider removing or adding implementation.';
 
+                // Check if this rule has different forms (Traditional vs Method)
+                var hasDifferentForms = ruleConfig.fixTemplates &&
+                                       ruleConfig.fixTemplates.traditional !== ruleConfig.fixTemplates.method;
+
                 suggestions.push({
                     line: lineNumber,
                     column: 0,
                     message: suggestionMsg,
                     severity: ruleConfig.severity || 'warning',
                     rule: this.name,
-                    fixable: false
+                    label: ruleConfig.label || this.name,
+                    fixable: true,  // Show as fixable for display purposes (shows both forms)
+                    hasDifferentForms: hasDifferentForms
                 });
             }
 
