@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.34
+ * VERSION: v3.35
  * LAST UPDATED: 2025-10-31
  *
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -21,6 +21,17 @@
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
+ *
+ * v3.35 FIX - CORRECT RULE 3 (UNIQUEKEY) CONFIG MISMATCH:
+ * - Fixed critical config/implementation mismatch in Rule 3
+ * - OLD config: "Ensure uniqueKey() expression is set to One-Time and No-Copy flags"
+ * - NEW config: "UniqueKey field **{field}** should follow naming convention (e.g., RecordID, ItemID)"
+ * - Config now accurately describes what the rule actually does
+ * - Rule checks: UniqueKey: FieldName (field must match pattern [A-Z][a-zA-Z0-9]*ID)
+ * - Added _instanceCounter for color coding support
+ * - Added **markers** around {field} placeholder for color highlighting
+ * - Updated description to match implementation
+ * - Cache-busting updated to v=3.35
  *
  * v3.34 FIX - RESTORE COLOR HIGHLIGHTING FOR QUERY FUNCTIONS:
  * - Re-added **{function}()** placeholder to enable color highlighting
@@ -390,7 +401,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.34
+            Version: v3.35
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>
@@ -437,8 +448,8 @@
     - Faster page load: 4 HTTP requests instead of 10+
     -->
 
-    <script src="dslSuggestionsEngine.js?v=3.34&t=1761997171" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
-    <script src="dslSuggestionsApp.js?v=3.34&t=1761997171"></script>
+    <script src="dslSuggestionsEngine.js?v=3.35&t=1761999767" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
+    <script src="dslSuggestionsApp.js?v=3.35&t=1761999767"></script>
 
     <style>
         /* v3.00 - Simplified styles, removed all popup-related CSS */
