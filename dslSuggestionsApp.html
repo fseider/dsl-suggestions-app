@@ -493,11 +493,7 @@
         <label for="suggestionOutput" style="display: block; margin-top: 20px; margin-bottom: 10px;">Suggestions (Plain Text):</label>
         <div id="suggestionOutput" class="code-output" data-placeholder="Suggestions will appear here..."></div>
 
-        <label for="htmlOutput" style="display: block; margin-top: 20px; margin-bottom: 10px;">Suggestions (HTML with Color Coding):</label>
-        <div id="htmlOutput" class="code-output html-output" data-placeholder="Color-coded suggestions will appear here..."></div>
-
-        <label for="suggestionsApplied" style="display: block; margin-top: 20px; margin-bottom: 5px;">Suggestions Applied to Formatted Expression:</label>
-        <div style="margin-bottom: 8px; padding: 8px; background: #f5f5f5; border-radius: 4px;">
+        <div style="margin-top: 20px; margin-bottom: 8px; padding: 8px; background: #f5f5f5; border-radius: 4px;">
             <span style="font-weight: bold; margin-right: 15px;">Display Form:</span>
             <label style="margin-right: 15px; cursor: pointer;">
                 <input type="radio" name="suggestionForm" id="showTraditionalForm" value="traditional" checked onchange="updateAppliedSuggestions()">
@@ -508,6 +504,11 @@
                 Method ((x).ifNaN(0))
             </label>
         </div>
+
+        <label for="htmlOutput" style="display: block; margin-bottom: 10px;">Suggestions (HTML with Color Coding):</label>
+        <div id="htmlOutput" class="code-output html-output" data-placeholder="Color-coded suggestions will appear here..."></div>
+
+        <label for="suggestionsApplied" style="display: block; margin-top: 20px; margin-bottom: 5px;">Suggestions Applied to Formatted Expression:</label>
         <div style="position: relative;">
             <div id="suggestionsApplied" class="code-output" data-placeholder="Code with suggestions applied will appear here..."></div>
             <div style="text-align: right; margin-top: 5px;">
