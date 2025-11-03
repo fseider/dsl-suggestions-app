@@ -270,15 +270,11 @@ function getSuggestions() {
     originalInputCode = code;
 
     try {
-        // Generate suggestions showing BOTH forms
+        // Generate suggestions with color coding and applied suggestions
         if (typeof generateCodeSuggestions === 'function') {
-            var suggestions = generateSuggestionsWithBothForms(code);
-            setElementContent('suggestionOutput', suggestions);
-
             // Generate HTML version with color coding using selected form
             updateHtmlOutput();
         } else {
-            setElementContent('suggestionOutput', 'Suggestions functionality not loaded.');
             document.getElementById('htmlOutput').innerHTML = 'Suggestions functionality not loaded.';
         }
 
@@ -765,17 +761,11 @@ function copyRuleExample(ruleName) {
 // Clear the suggestion input and outputs
 function clearSuggestionInput() {
     document.getElementById('suggestionInput').value = '';
-    // v2.07: Use helper function for div/textarea compatibility
-    setElementContent('suggestionOutput', '');
     setElementContent('suggestionsApplied', '');
-    // v3.18: Clear HTML output
     document.getElementById('htmlOutput').innerHTML = '';
 
-    // v2.09 - Clear original suggestions
-    originalSuggestions = '';
-    // v2.14 - Clear original applied suggestions
-    originalAppliedSuggestions = '';
-    // v2.16 - Clear stored input code
+    // Clear stored input code
+    originalInputCode = '';
     lastInputCode = '';
 }
 

@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.41
+ * VERSION: v3.42
  * LAST UPDATED: 2025-11-03
  *
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -21,6 +21,16 @@
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
+ *
+ * v3.42 SIMPLIFICATION - REMOVED REDUNDANT PLAIN TEXT SUGGESTIONS:
+ * - Removed "Suggestions (Plain Text)" section - redundant with HTML color-coded output
+ * - Removed "Copy Suggestions" button - HTML output is superior
+ * - Plain text always showed BOTH Traditional and Method forms (not configurable)
+ * - HTML color-coded output now respects form selection (Traditional/Method)
+ * - Cleaner, simpler UI with less confusion
+ * - Removed JavaScript references: generateSuggestionsWithBothForms() calls, suggestionOutput clearing
+ * - Users can copy from HTML output or "Suggestions Applied" section (already has copy button)
+ * - Cache-busting updated to v=3.42
  *
  * v3.41 ENHANCEMENT - HTML OUTPUT HONORS DISPLAY FORM SELECTION:
  * - HTML color-coded suggestions now respect Traditional/Method form selection
@@ -487,7 +497,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.41
+            Version: v3.42
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>
@@ -497,11 +507,7 @@
             <button onclick="getSuggestions()">Get Suggestions</button>
             <button onclick="showAllPossibleSuggestions()">Show All Possible Suggestions</button>
             <button onclick="clearSuggestionInput()">Clear Input</button>
-            <button onclick="copyToClipboard('suggestionOutput')">Copy Suggestions</button>
         </div>
-        
-        <label for="suggestionOutput" style="display: block; margin-top: 20px; margin-bottom: 10px;">Suggestions (Plain Text):</label>
-        <div id="suggestionOutput" class="code-output" data-placeholder="Suggestions will appear here..."></div>
 
         <div style="margin-top: 20px; margin-bottom: 8px; padding: 8px; background: #f5f5f5; border-radius: 4px;">
             <span style="font-weight: bold; margin-right: 15px;">Display Form:</span>
@@ -535,8 +541,8 @@
     - Faster page load: 4 HTTP requests instead of 10+
     -->
 
-    <script src="dslSuggestionsEngine.js?v=3.41&t=1762246000" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
-    <script src="dslSuggestionsApp.js?v=3.41&t=1762246000"></script>
+    <script src="dslSuggestionsEngine.js?v=3.42&t=1762248000" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
+    <script src="dslSuggestionsApp.js?v=3.42&t=1762248000"></script>
 
     <style>
         /* v3.00 - Simplified styles, removed all popup-related CSS */
