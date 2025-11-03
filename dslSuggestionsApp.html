@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.35
+ * VERSION: v3.36
  * LAST UPDATED: 2025-10-31
  *
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -21,6 +21,15 @@
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
+ *
+ * v3.36 UPDATE - SIMPLIFY QUERY FUNCTION MESSAGE:
+ * - Changed message back to simpler singular form
+ * - Message now: "Ensure query based Attribute Expression is set as One-Time / No-Copy as per best practices"
+ * - Removed {function} placeholder (no color highlighting of function names)
+ * - Changed "Attributes" (plural) to "Attribute" (singular)
+ * - Removed comma before "as per best practices"
+ * - Simpler, cleaner message
+ * - Cache-busting updated to v=3.36
  *
  * v3.35 FIX - CORRECT RULE 3 (UNIQUEKEY) CONFIG MISMATCH:
  * - Fixed critical config/implementation mismatch in Rule 3
@@ -401,7 +410,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.35
+            Version: v3.36
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>
@@ -448,8 +457,8 @@
     - Faster page load: 4 HTTP requests instead of 10+
     -->
 
-    <script src="dslSuggestionsEngine.js?v=3.35&t=1761999767" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
-    <script src="dslSuggestionsApp.js?v=3.35&t=1761999767"></script>
+    <script src="dslSuggestionsEngine.js?v=3.36&t=1762147911" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
+    <script src="dslSuggestionsApp.js?v=3.36&t=1762147911"></script>
 
     <style>
         /* v3.00 - Simplified styles, removed all popup-related CSS */
