@@ -598,57 +598,48 @@ function showAllPossibleSuggestions() {
     // CRITICAL: All multi-statement expressions MUST be wrapped in block()
     var ruleExamples = {
         divisionOperations: `block(
-    // Division that could fail if denominator is zero
     result1 = total / count,
     result2 = price / quantity
 )`,
 
         queryFunctions: `block(
-    // Query functions impact performance
     result = query(null, qry),
     total = sumQuery(null, qry),
     avg = averageQuery(null, qry)
 )`,
 
         uniqueKey: `block(
-    // uniqueKey() arguments should end with "ID"
     recordKey = uniqueKey("xxColorRecord"),
     itemKey = uniqueKey("xxItemId")
 )`,
 
         variableNaming: `block(
-    // Variables should use lowerCamelCase
     user_name = "John",
     Product_ID = 123,
     MY_CONSTANT = "test"
 )`,
 
         nonOptimalNodeAccess: `block(
-    // Hierarchy node references in expressions
     value = ParentSeason.Name,
     color = ColorSpecification.Code,
     size = ProductSize.Value
 )`,
 
         nullAccessProtection: `block(
-    // Property access without null checks
     userName = user.name,
     itemCode = product.code,
     totalPrice = order.total
 )`,
 
         mathOperationsParens: `block(
-    // Complex math without parentheses
     result = a + b * c,
     value = x - y / z
 )`,
 
         extraneousBlocks: `block(
-    // Unnecessary block() for single statement
     result = value
 )
 
-// Or empty blocks
 block()
 {}`
     };
