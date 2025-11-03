@@ -75,9 +75,9 @@ var dslSuggestionsConfigData = {
     uniqueKey: {
       enabled: true,
       label: "UniqueKey",
-      description: "UniqueKey field naming convention - must end with 'ID'",
+      description: "uniqueKey() function argument naming convention - must end with 'ID'",
       suggestionType: "advisory",
-      suggestion: "UniqueKey field **{field}** should follow naming convention (e.g., RecordID, ItemID).",
+      suggestion: "uniqueKey field **{field}** should follow naming convention (must end with 'ID', e.g., xxRecordID, xxItemID).",
       function: "uniqueKey"
     },
 

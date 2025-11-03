@@ -321,22 +321,23 @@ var DSL_RULES = [
                 return suggestions;
             }
 
-            var lineWithoutStrings = DSLRuleUtils.String.removeStringLiterals(line);
-            var uniqueKeyPattern = /UniqueKey\s*:\s*(\w+)/gi;
+            // Pattern to detect uniqueKey("stringArgument") function calls
+            var uniqueKeyPattern = /uniqueKey\s*\(\s*["']([^"']+)["']\s*\)/gi;
             var match;
 
-            while ((match = uniqueKeyPattern.exec(lineWithoutStrings)) !== null) {
-                var keyField = match[1];
+            while ((match = uniqueKeyPattern.exec(line)) !== null) {
+                var keyField = match[1];  // Extract the string argument
                 var position = match.index;
 
                 if (DSLRuleUtils.String.isInsideString(line, position)) {
                     continue;
                 }
 
-                var validKeyPattern = /^[A-Z][a-zA-Z0-9]*ID$/;
+                // Validate naming convention: must end with "ID"
+                var validKeyPattern = /ID$/i;
                 if (!validKeyPattern.test(keyField)) {
                     var suggestionMsg = ruleConfig.suggestion ||
-                        'UniqueKey field "{field}" should follow naming convention (e.g., "RecordID", "ItemID")';
+                        'uniqueKey field **{field}** should follow naming convention (must end with "ID", e.g., "xxRecordID", "xxItemID")';
 
                     suggestionMsg = DSLRuleUtils.Message.replacePlaceholders(suggestionMsg, {
                         field: keyField
@@ -353,7 +354,7 @@ var DSL_RULES = [
                         rule: this.name,
                         label: ruleConfig.label || this.name,
                         fixable: false,
-                        original: 'UniqueKey: ' + keyField,
+                        original: 'uniqueKey("' + keyField + '")',
                         instanceNumber: this._instanceCounter
                     });
                 }
