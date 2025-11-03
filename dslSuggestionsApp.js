@@ -10,7 +10,7 @@
  * 
  * ARCHITECTURAL BOUNDARY: Suggestions
  * AUTO-LOADED BY: dslSuggestionsApp.html
- * PROVIDES: getSuggestions(), showAllPossibleSuggestions(), closeRulesPopup(), copyRuleExample(), debugExtraneousBlock(), clearSuggestionInput(), copyToClipboard(), dslSuggestionsAppVersion(), showVersionPopup(), closeVersionPopup(), updateSuggestionDisplay()
+ * PROVIDES: getSuggestions(), showAllPossibleSuggestions(), closeRulesPopup(), copyRuleExample(), debugExtraneousBlock(), clearSuggestionInput(), copyToClipboard(), dslSuggestionsAppVersion(), updateDisplayForm(), updateAppliedSuggestions()
  * 
  * DESCRIPTION:
  * JavaScript logic for standalone DSL Suggestions application.
@@ -20,204 +20,19 @@
  * v2.02: Added version popup display functionality.
  * v2.07: Updated functions to work with HTML divs instead of textareas for red SUGGESTION text support.
  * v2.08: Removed app interference - now displays engine output directly without modification.
- * v2.09: Added updateSuggestionDisplay function to control which suggestion forms are shown.
  * v2.10: Fixed critical bug - moved global function exposure out of catch block to proper location.
+ * v2.11: Code cleanup - removed unused checkbox validation code (v3.41+ uses radio buttons)
  */
 
-// App version
-// v2.09 - Added suggestion display control
-// var DSL_SUGGESTIONS_APP_VERSION = '2.09';
-
-// v2.10 - Fixed function exposure bug
+// App version v2.10 - Fixed function exposure bug
 var DSL_SUGGESTIONS_APP_VERSION = '2.10';
 
 function dslSuggestionsAppVersion() {
     return 'v' + DSL_SUGGESTIONS_APP_VERSION;
 }
 
-// v2.09 - Store original suggestions for filtering
-var originalSuggestions = '';
-
 // v3.03 - Store original input code for reapplying with different forms
 var originalInputCode = '';
-
-// v2.13 - Store last valid checkbox state
-var lastCheckboxState = {
-    traditional: true,
-    method: true
-};
-
-// v2.13 - Validate checkbox before change
-function validateCheckbox(checkboxId) {
-    var traditionalCheckbox = document.getElementById('showTraditionalForm');
-    var methodCheckbox = document.getElementById('showMethodForm');
-    
-    // Determine which checkbox is being changed
-    var isTraditional = (checkboxId === 'showTraditionalForm');
-    var otherCheckbox = isTraditional ? methodCheckbox : traditionalCheckbox;
-    var thisCheckbox = isTraditional ? traditionalCheckbox : methodCheckbox;
-    
-    // If the other checkbox is unchecked and this one is being unchecked, prevent it
-    if (!otherCheckbox.checked && !thisCheckbox.checked) {
-        // Revert this checkbox to checked
-        thisCheckbox.checked = true;
-        // Optionally show a message
-        // alert('At least one display form must be selected');
-        return false;
-    }
-    
-    // Update last valid state
-    lastCheckboxState.traditional = traditionalCheckbox.checked;
-    lastCheckboxState.method = methodCheckbox.checked;
-    
-    return true;
-}
-
-// v2.13 - Simplified update function
-function updateSuggestionDisplay(checkboxId) {
-    // Validate the change
-    if (!validateCheckbox(checkboxId)) {
-        return; // Change was rejected
-    }
-    
-    var traditionalCheckbox = document.getElementById('showTraditionalForm');
-    var methodCheckbox = document.getElementById('showMethodForm');
-    
-    var showTraditional = traditionalCheckbox.checked;
-    var showMethod = methodCheckbox.checked;
-    
-    // If we don't have original suggestions, get current content
-    if (!originalSuggestions) {
-        var outputElement = document.getElementById('suggestionOutput');
-        if (outputElement) {
-            originalSuggestions = outputElement.innerHTML;
-        }
-    }
-    
-    if (!originalSuggestions) return;
-    
-    // Filter suggestions based on selection
-    var filteredContent = filterSuggestionForms(originalSuggestions, showTraditional, showMethod);
-    setElementContent('suggestionOutput', filteredContent);
-}
-
-// v2.11 - Simplified and fixed filtering function
-function filterSuggestionForms(content, showTraditional, showMethod) {
-    // If both are selected, return original
-    if (showTraditional && showMethod) {
-        return content;
-    }
-    
-    // Split content into lines
-    var lines = content.split('\n');
-    var filteredLines = [];
-    var inSuggestion = false;
-    var suggestionLines = [];
-    var suggestionIndent = '';
-    
-    for (var i = 0; i < lines.length; i++) {
-        var line = lines[i];
-        
-        // Check if starting a SUGGESTION comment
-        if (line.includes('/* ') && line.includes('SUGGESTION')) {
-            inSuggestion = true;
-            suggestionLines = [line];
-            // Capture indent for this suggestion
-            suggestionIndent = line.match(/^(\s*)/)[1] || '';
-            
-            // Check if it's a single-line suggestion
-            if (line.includes('*/')) {
-                // Single line suggestion - process it
-                inSuggestion = false;
-                var processed = processSuggestionBlock(suggestionLines, showTraditional, showMethod, suggestionIndent);
-                filteredLines = filteredLines.concat(processed);
-                suggestionLines = [];
-            }
-        } else if (inSuggestion) {
-            // Collecting multi-line suggestion
-            suggestionLines.push(line);
-            
-            // Check if this ends the suggestion
-            if (line.includes('*/')) {
-                inSuggestion = false;
-                // Process the complete suggestion block
-                var processed = processSuggestionBlock(suggestionLines, showTraditional, showMethod, suggestionIndent);
-                filteredLines = filteredLines.concat(processed);
-                suggestionLines = [];
-            }
-        } else {
-            // Not in a suggestion, keep the line
-            filteredLines.push(line);
-        }
-    }
-    
-    return filteredLines.join('\n');
-}
-
-// v2.11 - Process a complete suggestion block
-function processSuggestionBlock(lines, showTraditional, showMethod, baseIndent) {
-    // If showing both, return as-is
-    if (showTraditional && showMethod) {
-        return lines;
-    }
-    
-    var result = [];
-    var hasDescription = false;
-    var traditionalLine = null;
-    var methodLine = null;
-    var orLine = null;
-    
-    // Analyze the lines
-    for (var i = 0; i < lines.length; i++) {
-        var line = lines[i];
-        var trimmed = line.trim();
-        
-        // First line with SUGGESTION is always kept (it's the description)
-        if (line.includes('SUGGESTION')) {
-            result.push(line);
-            hasDescription = true;
-        } else if (trimmed === 'OR') {
-            orLine = i;
-        } else if (trimmed.startsWith('ifNaN(') || trimmed.startsWith('ifNull(')) {
-            // Traditional form
-            traditionalLine = line;
-        } else if (trimmed.startsWith('(') && (trimmed.includes(').ifNaN(') || trimmed.includes(').ifNull('))) {
-            // Method form
-            methodLine = line;
-        } else if (trimmed === '*/') {
-            // Closing line - will add at end
-        } else if (trimmed !== '') {
-            // Other content (might be part of description or traditional form)
-            // Check if it's before OR - likely traditional
-            if (orLine === null || i < orLine) {
-                if (!traditionalLine && (line.includes('ifNaN(') || line.includes('ifNull('))) {
-                    traditionalLine = line;
-                }
-            }
-        }
-    }
-    
-    // Build the filtered result
-    if (showTraditional && !showMethod) {
-        // Show only traditional
-        if (traditionalLine) {
-            result.push(traditionalLine);
-        }
-    } else if (!showTraditional && showMethod) {
-        // Show only method
-        if (methodLine) {
-            result.push(methodLine);
-        }
-    }
-    
-    // Add closing */ if needed
-    var lastLine = lines[lines.length - 1];
-    if (lastLine.includes('*/')) {
-        result.push(lastLine);
-    }
-    
-    return result;
-}
 
 // v2.07 - Helper function to set content (detects div vs textarea)
 function setElementContent(elementId, content) {
@@ -774,7 +589,6 @@ function clearSuggestionInput() {
 
     // Clear stored input code
     originalInputCode = '';
-    lastInputCode = '';
 }
 
 // Copy content to clipboard
@@ -886,11 +700,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // v2.10 - CRITICAL FIX: Properly expose functions to global scope
-// v2.11 - Added regenerateAppliedSuggestions to exports
 // This MUST be at the file's top level, not inside any function
 if (typeof window !== 'undefined') {
-    window.updateSuggestionDisplay = updateSuggestionDisplay;
-    window.regenerateAppliedSuggestions = regenerateAppliedSuggestions;
     window.updateAppliedSuggestions = updateAppliedSuggestions;  // v3.03 - New function for radio control
     window.updateDisplayForm = updateDisplayForm;  // v3.41 - Update both HTML and applied suggestions
     window.getSuggestions = getSuggestions;
