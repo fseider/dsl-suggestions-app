@@ -326,43 +326,34 @@ var DSL_RULES = [
                 return suggestions;
             }
 
-            // Pattern to detect uniqueKey("stringArgument") function calls
-            var uniqueKeyPattern = /uniqueKey\s*\(\s*["']([^"']+)["']\s*\)/gi;
+            // Pattern to detect uniqueKey() function calls
+            var uniqueKeyPattern = /uniqueKey\s*\(/gi;
             var match;
 
             while ((match = uniqueKeyPattern.exec(line)) !== null) {
-                var keyField = match[1];  // Extract the string argument
                 var position = match.index;
 
                 if (DSLRuleUtils.String.isInsideString(line, position)) {
                     continue;
                 }
 
-                // Validate naming convention: must end with "ID"
-                var validKeyPattern = /ID$/i;
-                if (!validKeyPattern.test(keyField)) {
-                    var suggestionMsg = ruleConfig.suggestion ||
-                        'uniqueKey field **{field}** should follow naming convention (must end with "ID", e.g., "xxRecordID", "xxItemID")';
+                var suggestionMsg = ruleConfig.suggestion ||
+                    'Ensure Attribute with uniqueKey Expression is set as "One-Time / No-Copy" as per best practices.';
 
-                    suggestionMsg = DSLRuleUtils.Message.replacePlaceholders(suggestionMsg, {
-                        field: keyField
-                    });
+                // Increment instance counter
+                this._instanceCounter++;
 
-                    // Increment instance counter
-                    this._instanceCounter++;
-
-                    suggestions.push({
-                        line: lineNumber,
-                        column: position,
-                        message: suggestionMsg,
-                        severity: ruleConfig.severity || 'warning',
-                        rule: this.name,
-                        label: ruleConfig.label || this.name,
-                        fixable: false,
-                        original: 'uniqueKey("' + keyField + '")',
-                        instanceNumber: this._instanceCounter
-                    });
-                }
+                suggestions.push({
+                    line: lineNumber,
+                    column: position,
+                    message: suggestionMsg,
+                    severity: ruleConfig.severity || 'warning',
+                    rule: this.name,
+                    label: ruleConfig.label || this.name,
+                    fixable: false,
+                    original: 'uniqueKey',
+                    instanceNumber: this._instanceCounter
+                });
             }
 
             return suggestions;

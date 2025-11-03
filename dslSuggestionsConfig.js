@@ -74,10 +74,10 @@ var dslSuggestionsConfigData = {
 
     uniqueKey: {
       enabled: true,
-      label: "UniqueKey",
-      description: "uniqueKey() function argument naming convention - must end with 'ID'",
+      label: "uniqueKey",
+      description: "uniqueKey() expressions should be set as One-Time / No-Copy",
       suggestionType: "advisory",
-      suggestion: "**uniqueKey** field **{field}** should follow naming convention (must end with 'ID', e.g., xxRecordID, xxItemID).",
+      suggestion: "Ensure Attribute with **uniqueKey** Expression is set as \"One-Time / No-Copy\" as per best practices.",
       function: "uniqueKey"
     },
 

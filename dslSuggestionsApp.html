@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.47
+ * VERSION: v3.48
  * LAST UPDATED: 2025-11-03
  *
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -21,6 +21,17 @@
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
+ *
+ * v3.48 UPDATE - UNIQUEKEY RULE PURPOSE CHANGE:
+ * - Changed uniqueKey rule from naming convention validation to best practice reminder
+ *   - OLD: Validated that argument ends with "ID" (e.g., xxColorRecord should be xxColorRecordID)
+ *   - NEW: Always suggests to set attribute as "One-Time / No-Copy" regardless of argument
+ * - Updated suggestion message: "Ensure Attribute with **uniqueKey** Expression is set as \"One-Time / No-Copy\" as per best practices."
+ * - Simplified rule logic: detects any uniqueKey() call and always makes suggestion
+ * - No longer extracts or validates the argument name
+ * - Function name "uniqueKey" is highlighted in code (argument is not highlighted)
+ * - Updated rule description and label in config
+ * - Cache-busting updated to v=3.48
  *
  * v3.47 CRITICAL FIX - DIVISION RULE SIMPLE COMMENT SKIP:
  * - Replaced complex regex approach with simple, reliable check
@@ -547,7 +558,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.47
+            Version: v3.48
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>
@@ -591,8 +602,8 @@
     - Faster page load: 4 HTTP requests instead of 10+
     -->
 
-    <script src="dslSuggestionsEngine.js?v=3.47&t=1762258000" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
-    <script src="dslSuggestionsApp.js?v=3.47&t=1762258000"></script>
+    <script src="dslSuggestionsEngine.js?v=3.48&t=1762260000" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
+    <script src="dslSuggestionsApp.js?v=3.48&t=1762260000"></script>
 
     <style>
         /* v3.00 - Simplified styles, removed all popup-related CSS */
