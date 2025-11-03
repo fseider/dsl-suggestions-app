@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.40
+ * VERSION: v3.41
  * LAST UPDATED: 2025-11-03
  *
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -21,6 +21,16 @@
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
+ *
+ * v3.41 ENHANCEMENT - HTML OUTPUT HONORS DISPLAY FORM SELECTION:
+ * - HTML color-coded suggestions now respect Traditional/Method form selection
+ * - When you select Traditional or Method, BOTH plain text and HTML outputs update
+ * - Simplified Display Form labels: "Traditional" and "Method" (removed code examples)
+ * - New updateDisplayForm() function updates both HTML and applied suggestions
+ * - HTML output now shows only selected form instead of both forms
+ * - Better UX: One selection controls all outputs consistently
+ * - Modified generateSuggestionsWithColorCoding() to accept selectedForm parameter
+ * - Cache-busting updated to v=3.41
  *
  * v3.40 CRITICAL FIX - CORRECT ALL EXAMPLES TO USE block():
  * - Fixed ALL rule examples to properly wrap multi-statement expressions in block()
@@ -477,7 +487,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.40
+            Version: v3.41
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>
@@ -496,12 +506,12 @@
         <div style="margin-top: 20px; margin-bottom: 8px; padding: 8px; background: #f5f5f5; border-radius: 4px;">
             <span style="font-weight: bold; margin-right: 15px;">Display Form:</span>
             <label style="margin-right: 15px; cursor: pointer;">
-                <input type="radio" name="suggestionForm" id="showTraditionalForm" value="traditional" checked onchange="updateAppliedSuggestions()">
-                Traditional (ifNaN(x, 0))
+                <input type="radio" name="suggestionForm" id="showTraditionalForm" value="traditional" checked onchange="updateDisplayForm()">
+                Traditional
             </label>
             <label style="cursor: pointer;">
-                <input type="radio" name="suggestionForm" id="showMethodForm" value="method" onchange="updateAppliedSuggestions()">
-                Method ((x).ifNaN(0))
+                <input type="radio" name="suggestionForm" id="showMethodForm" value="method" onchange="updateDisplayForm()">
+                Method
             </label>
         </div>
 
@@ -525,8 +535,8 @@
     - Faster page load: 4 HTTP requests instead of 10+
     -->
 
-    <script src="dslSuggestionsEngine.js?v=3.40&t=1762244000" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
-    <script src="dslSuggestionsApp.js?v=3.40&t=1762244000"></script>
+    <script src="dslSuggestionsEngine.js?v=3.41&t=1762246000" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
+    <script src="dslSuggestionsApp.js?v=3.41&t=1762246000"></script>
 
     <style>
         /* v3.00 - Simplified styles, removed all popup-related CSS */

@@ -275,9 +275,8 @@ function getSuggestions() {
             var suggestions = generateSuggestionsWithBothForms(code);
             setElementContent('suggestionOutput', suggestions);
 
-            // Also generate HTML version with color coding
-            var htmlSuggestions = generateSuggestionsWithColorCoding(code);
-            document.getElementById('htmlOutput').innerHTML = htmlSuggestions;
+            // Generate HTML version with color coding using selected form
+            updateHtmlOutput();
         } else {
             setElementContent('suggestionOutput', 'Suggestions functionality not loaded.');
             document.getElementById('htmlOutput').innerHTML = 'Suggestions functionality not loaded.';
@@ -337,10 +336,13 @@ function generateSuggestionsWithBothForms(code) {
 }
 
 // v3.20 - Generate suggestions with HTML color coding and distinct colors per rule instance
-function generateSuggestionsWithColorCoding(code) {
+function generateSuggestionsWithColorCoding(code, selectedForm) {
     if (!code || typeof analyzeDSL !== 'function') {
         return 'Analysis functionality not loaded.';
     }
+
+    // Default to traditional if not specified
+    selectedForm = selectedForm || 'traditional';
 
     // Get raw analysis results
     var analysis = analyzeDSL(code);
@@ -456,9 +458,9 @@ function generateSuggestionsWithColorCoding(code) {
             message = highlightObjects(message, colorIndex);
 
             if (suggestion.fixable && suggestion.hasDifferentForms) {
-                // Fixable rules with different Traditional/Method forms
-                result.push(indent + '/* SUGGESTION - ' + label + ' (Traditional): ' + message + ' */');
-                result.push(indent + '/* SUGGESTION - ' + label + ' (Method): ' + message + ' */');
+                // Fixable rules with different Traditional/Method forms - show only selected form
+                var formLabel = selectedForm === 'traditional' ? 'Traditional' : 'Method';
+                result.push(indent + '/* SUGGESTION - ' + label + ' (' + formLabel + '): ' + message + ' */');
             } else {
                 // Advisory rules OR fixable rules with single form
                 result.push(indent + '/* SUGGESTION - ' + label + ': ' + message + ' */');
@@ -501,6 +503,32 @@ function updateAppliedSuggestions() {
     } catch (error) {
         console.error('Error updating applied suggestions:', error);
     }
+}
+
+// Update HTML output with color coding based on selected form
+function updateHtmlOutput() {
+    if (!originalInputCode) {
+        return;
+    }
+
+    try {
+        // Get selected form
+        var traditionalRadio = document.getElementById('showTraditionalForm');
+        var selectedForm = (traditionalRadio && traditionalRadio.checked) ? 'traditional' : 'method';
+
+        // Generate HTML version with color coding
+        var htmlSuggestions = generateSuggestionsWithColorCoding(originalInputCode, selectedForm);
+        document.getElementById('htmlOutput').innerHTML = htmlSuggestions;
+
+    } catch (error) {
+        console.error('Error updating HTML output:', error);
+    }
+}
+
+// Update both HTML and applied suggestions when form selection changes
+function updateDisplayForm() {
+    updateHtmlOutput();
+    updateAppliedSuggestions();
 }
 
 // Helper function to get line indentation
@@ -866,6 +894,7 @@ if (typeof window !== 'undefined') {
     window.updateSuggestionDisplay = updateSuggestionDisplay;
     window.regenerateAppliedSuggestions = regenerateAppliedSuggestions;
     window.updateAppliedSuggestions = updateAppliedSuggestions;  // v3.03 - New function for radio control
+    window.updateDisplayForm = updateDisplayForm;  // v3.41 - Update both HTML and applied suggestions
     window.getSuggestions = getSuggestions;
     window.clearSuggestionInput = clearSuggestionInput;
     window.copyToClipboard = copyToClipboard;
