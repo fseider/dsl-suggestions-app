@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.44
+ * VERSION: v3.45
  * LAST UPDATED: 2025-11-03
  *
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -21,6 +21,15 @@
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
+ *
+ * v3.45 FIX - UNIQUEKEY HIGHLIGHTING AND EXAMPLE COMMENT:
+ * - Fixed uniqueKey function highlighting in code
+ *   - Changed **uniqueKey()** to **uniqueKey** in config message
+ *   - Now highlights just "uniqueKey" in code like: recordKey = uniqueKey("xxColorRecord")
+ *   - Does not highlight the argument "xxColorRecord"
+ * - Updated uniqueKey example comment to "/* uniqueKey() Best Practices */"
+ * - Consistent with query function highlighting fix from v3.44
+ * - Cache-busting updated to v=3.45
  *
  * v3.44 BUG FIX - DIVISION RULE AND QUERY HIGHLIGHTING:
  * - Fixed division rule falsely detecting /* comment syntax as division
@@ -519,7 +528,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.44
+            Version: v3.45
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>
@@ -563,8 +572,8 @@
     - Faster page load: 4 HTTP requests instead of 10+
     -->
 
-    <script src="dslSuggestionsEngine.js?v=3.44&t=1762252000" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
-    <script src="dslSuggestionsApp.js?v=3.44&t=1762252000"></script>
+    <script src="dslSuggestionsEngine.js?v=3.45&t=1762254000" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
+    <script src="dslSuggestionsApp.js?v=3.45&t=1762254000"></script>
 
     <style>
         /* v3.00 - Simplified styles, removed all popup-related CSS */

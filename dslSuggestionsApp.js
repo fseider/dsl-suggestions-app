@@ -635,7 +635,7 @@ function showAllPossibleSuggestions() {
 )`,
 
         uniqueKey: `block(
-    /* uniqueKey() arguments should end with "ID" */
+    /* uniqueKey() Best Practices */
     recordKey = uniqueKey("xxColorRecord"),
     itemKey = uniqueKey("xxItemId")
 )`,
