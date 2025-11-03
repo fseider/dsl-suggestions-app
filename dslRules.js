@@ -51,8 +51,8 @@ var DSL_RULES = [
 
             var lineWithoutStrings = DSLRuleUtils.String.removeStringLiterals(line);
 
-            // Find all division operators (skip /= and /* comments)
-            var divisionPattern = /\/(?![=*])/g;  // Match / but not /= or /*
+            // Find all division operators (skip /=, /* and */ comments)
+            var divisionPattern = /(?<!\*)\/(?![=*])/g;  // Match / but not /=, /*, or */
             var match;
             var processedExpressions = {};  // Track already processed expressions
 
