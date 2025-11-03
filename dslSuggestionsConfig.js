@@ -1,7 +1,5 @@
 /*
  * FILE: dslSuggestionsConfig.js
- * VERSION: v3.00
- * LAST UPDATED: 2025-10-29
  *
  * ARTIFACT INFO (for proper Claude artifact creation):
  * - ID: dslSuggestionsConfig.js
@@ -15,12 +13,7 @@
  * DESCRIPTION:
  * Configuration data for DSL suggestions engine including rule definitions,
  * patterns, and fix strategies for code analysis and improvement.
- *
- * OPTIMIZATION v3.00:
- * - Extracted common defaults to reduce duplication
- * - Simplified structure (less nesting where possible)
- * - Rules now inherit defaults and only specify overrides
- * - Reduced configuration verbosity by ~30%
+ * Version tracking: See dslSuggestionsApp.html for app version.
  */
 
 var dslSuggestionsConfigData = {
@@ -45,10 +38,12 @@ var dslSuggestionsConfigData = {
   // Rule configurations (only specify what differs from defaults)
   suggestionRules: {
     divisionOperations: {
+      enabled: true,
+      label: "Div By 0",
       description: "Detect division operations that may need zero protection",
-      suggestionType: "fixable",
-      suggestion: "Use ifNaN({expression}, 0.0) for Divide-By-Zero protection.",
-      autoFixEnabled: true,
+      suggestionType: "advisory",
+      suggestion: "Division detected in expression. Wrap entire formula with ifNaN(**{expression}**, DEFAULT_VALUE) for Divide-By-Zero protection.",
+      autoFixEnabled: false,
       fixTemplates: {
         traditional: "ifNaN({expression}, {defaultAltValue})",
         method: "({expression}).ifNaN({defaultAltValue})"
@@ -56,14 +51,16 @@ var dslSuggestionsConfigData = {
       skipIfWrappedIn: ["ifNaN", "catch", "ifNull", "safeDivide"],
       errorOnZeroLiteral: true,
       errorMessage: "ERROR: Division by zero literal! {expression}",
-      defaultAltValue: 0.0
+      defaultAltValue: "0.0"
     },
 
-    queryFunctionsRule: {
+    queryFunctions: {
+      enabled: true,
+      label: "Query",
       description: "Query based functions impact performance. Should be set as One-Time / No-Copy",
       severity: "info",
       suggestionType: "advisory",
-      suggestion: "Ensure setting {function}() as \"One-Time / No-Copy\" for better performance.",
+      suggestion: "Ensure query based Attribute Expression **{function}** is set as \"One-Time / No-Copy\" as per best practices.",
       functionNames: [
         "averageQuery",
         "countQuery",
@@ -72,27 +69,26 @@ var dslSuggestionsConfigData = {
         "query",
         "sumQuery",
         "weightedAverageQuery"
-      ],
-      inefficientPatterns: [
-        { pattern: /\.filter\([^)]+\)\.first\(\)/g, suggestion: 'Use .findFirst() instead of .filter().first()' },
-        { pattern: /\.filter\([^)]+\)\.count\(\)/g, suggestion: 'Use .count() with condition instead of .filter().count()' },
-        { pattern: /\.map\([^)]+\)\.filter\([^)]+\)/g, suggestion: 'Consider combining or reordering .map() and .filter()' }
       ]
     },
 
-    uniqueKeyRule: {
-      description: "uniqueKey function has special configuration requirements",
+    uniqueKey: {
+      enabled: true,
+      label: "uniqueKey",
+      description: "uniqueKey() expressions should be set as One-Time / No-Copy",
       suggestionType: "advisory",
-      suggestion: "Ensure uniqueKey() expression is set to \"One-Time\" and \"No-Copy\" flags.",
+      suggestion: "Ensure Attribute with **uniqueKey** Expression is set as \"One-Time / No-Copy\" as per best practices.",
       function: "uniqueKey"
     },
 
-    variableNamingRule: {
+    variableNaming: {
+      enabled: true,
+      label: "Var Naming",
       description: "Enforce lowerCamelCase naming convention",
       severity: "info",
-      suggestionType: "fixable",
-      suggestion: "Use lowerCamelCase: {correctedNames}.",
-      autoFixEnabled: true,
+      suggestionType: "advisory",
+      suggestion: "Variable **{varName}** should use lowerCamelCase: **{correctedName}**.",
+      autoFixEnabled: false,
       fixTemplates: {
         traditional: "{correctedName}",
         method: "{correctedName}"
@@ -100,11 +96,13 @@ var dslSuggestionsConfigData = {
       separatorCharacters: ["_", "-"]
     },
 
-    nonOptimalNodeAccessRule: {
+    nonOptimalNodeAccess: {
+      enabled: true,
+      label: "Node Perf",
       description: "Hierarchy / Library node references that can impact continuous expression performance",
       severity: "info",
       suggestionType: "advisory",
-      suggestion: "{library} node reference detected. Consider use of a One-Time Attribute Expression to store the target value.",
+      suggestion: "**{library}** node reference detected. Consider use of a One-Time Attribute Expression to store the target value.",
       libraryNodes: [
         "ParentSeason.",
         "Collection.",
@@ -120,11 +118,13 @@ var dslSuggestionsConfigData = {
       ]
     },
 
-    nullAccessProtectionRule: {
+    nullAccessProtection: {
+      enabled: true,
+      label: "Null Safety",
       description: "Detect Node chains that may fail due to null/undefined values",
-      suggestionType: "fixable",
-      suggestion: "Add null protection using ifNull({expression}) for safe property access.",
-      autoFixEnabled: true,
+      suggestionType: "advisory",
+      suggestion: "Add null protection for **{object}** when accessing .{property}",
+      autoFixEnabled: false,
       fixStyle: "method",
       fixTemplates: {
         traditional: "ifNull({expression}, {defaultAltValue})",
@@ -133,22 +133,26 @@ var dslSuggestionsConfigData = {
       defaultAltValue: "ref, string, etc."
     },
 
-    mathOperationsParensRule: {
+    mathOperationsParens: {
+      enabled: true,
+      label: "Math Clarity",
       description: "Detect math operations that may need parentheses for clarity",
       severity: "info",
       suggestionType: "advisory",
       suggestion: "Consider use of parens () to group math operations for clarity."
     },
 
-    extraneousBlocksRule: {
+    extraneousBlocks: {
+      enabled: true,
+      label: "Extraneous Block",
       description: "Detect unnecessary block statements with single content",
       severity: "info",
-      suggestionType: "fixable",
+      suggestionType: "advisory",
       suggestion: "Remove unnecessary block() wrapper for single statement.",
       autoFixEnabled: true
     }
   },
 
-  // Global library configuration (used by nonOptimalNodeAccessRule)
+  // Global library configuration (used by nonOptimalNodeAccess)
   libraries: ["Primary", "Secondary", "Tertiary"]
 };

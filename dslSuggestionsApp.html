@@ -1,21 +1,560 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.00
- * LAST UPDATED: 2025-10-29
- * 
+ * VERSION: v3.50
+ * LAST UPDATED: 2025-11-03
+ *
  * ARTIFACT INFO (for proper Claude artifact creation):
  * - ID: dslSuggestionsApp.html
  * - Title: dslSuggestionsApp
  * - Type: text/html
- * 
+ *
  * ARCHITECTURAL BOUNDARY: Suggestions
  * LOADS: dslSuggestionsEngine.js, dslSuggestionsApp.js
- * 
+ *
  * DESCRIPTION:
  * Standalone DSL Suggestions application providing code analysis and suggestion functionality.
  * Simple interface with input/output textareas and suggestion controls.
  * Self-contained suggestions app separate from main application.
- * 
+ *
+ * VERSION TRACKING STRATEGY:
+ * - This file (dslSuggestionsApp.html) is the MASTER version for the entire app
+ * - Any change to ANY file bumps this version
+ * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
+ * - All other files reference this master version
+ *
+ * v3.50 FIX - MATH OPERATIONS COLOR HIGHLIGHTING IMPLEMENTATION:
+ * - Fixed how **markers** are applied for math expression highlighting
+ *   - REMOVED placeholder approach from v3.49 (was showing ** in suggestion text)
+ *   - Now appends '**' + expression + '**' directly to suggestion message in rule logic
+ *   - Expression gets extracted and highlighted in code without showing ** in message
+ * - Simplified config: removed {expression} placeholder, back to simple message
+ * - Color system: extracts objects from **markers** → maps to colors → highlights in code
+ * - Both "a + b * c" and "x - y / z" now properly color highlighted in code
+ * - Cache-busting updated to v=3.50
+ *
+ * v3.49 FIX - MATH OPERATIONS COLOR CODING AND NODE COMMENT:
+ * - Added color coding to math operations rule (Rule 7)
+ *   - Added **{expression}** marker to config suggestion message
+ *   - Added placeholder replacement in rule logic to populate {expression}
+ *   - Now both "a + b * c" and "x - y / z" are color highlighted
+ * - Updated node access example comment in popup
+ *   - OLD: "/* Hierarchy node references in expressions */"
+ *   - NEW: "/* Hierarchy / Library Item node references in expressions */"
+ * - Cache-busting updated to v=3.49
+ *
+ * v3.48 UPDATE - UNIQUEKEY RULE PURPOSE CHANGE:
+ * - Changed uniqueKey rule from naming convention validation to best practice reminder
+ *   - OLD: Validated that argument ends with "ID" (e.g., xxColorRecord should be xxColorRecordID)
+ *   - NEW: Always suggests to set attribute as "One-Time / No-Copy" regardless of argument
+ * - Updated suggestion message: "Ensure Attribute with **uniqueKey** Expression is set as \"One-Time / No-Copy\" as per best practices."
+ * - Simplified rule logic: detects any uniqueKey() call and always makes suggestion
+ * - No longer extracts or validates the argument name
+ * - Function name "uniqueKey" is highlighted in code (argument is not highlighted)
+ * - Updated rule description and label in config
+ * - Cache-busting updated to v=3.48
+ *
+ * v3.47 CRITICAL FIX - DIVISION RULE SIMPLE COMMENT SKIP:
+ * - Replaced complex regex approach with simple, reliable check
+ *   - Previous attempts with regex patterns /\/(?![=*])/g and /(?<!\*)\/(?![=*])/g still failed
+ *   - New approach: Skip entire line if it contains both /* and */
+ *   - Added check: if (line.indexOf('/*') !== -1 && line.indexOf('*/') !== -1) return;
+ * - Simplified division pattern back to /\/(?!=)/g (just skip /=)
+ * - Now comment lines like /* uniqueKey() Best Practices */ are completely ignored
+ * - Tested and verified - no more false division detection on comments
+ * - Cache-busting updated to v=3.47
+ *
+ * v3.46 CRITICAL FIX - DIVISION RULE STILL TRIGGERING ON */ COMMENT CLOSE:
+ * - Fixed division rule that was matching the / in */ at end of comments
+ *   - v3.44 pattern /\/(?![=*])/g only skipped /* but not */
+ *   - New pattern /(?<!\*)\/(?![=*])/g skips both /* and */
+ *   - Negative lookbehind (?<!\*) ensures / is not preceded by *
+ *   - Negative lookahead (?![=*]) ensures / is not followed by = or *
+ * - Now comments like /* uniqueKey() Best Practices */ don't trigger division detection
+ * - Cache-busting updated to v=3.46
+ *
+ * v3.45 FIX - UNIQUEKEY HIGHLIGHTING AND EXAMPLE COMMENT:
+ * - Fixed uniqueKey function highlighting in code
+ *   - Changed **uniqueKey()** to **uniqueKey** in config message
+ *   - Now highlights just "uniqueKey" in code like: recordKey = uniqueKey("xxColorRecord")
+ *   - Does not highlight the argument "xxColorRecord"
+ * - Updated uniqueKey example comment to "/* uniqueKey() Best Practices */"
+ * - Consistent with query function highlighting fix from v3.44
+ * - Cache-busting updated to v=3.45
+ *
+ * v3.44 BUG FIX - DIVISION RULE AND QUERY HIGHLIGHTING:
+ * - Fixed division rule falsely detecting /* comment syntax as division
+ *   - Changed pattern from /\/(?!=)/g to /\/(?![=*])/g
+ *   - Now skips both /= (compound assignment) and /* (comment start)
+ *   - Comments with /* */ no longer trigger false division suggestions
+ * - Fixed query function highlighting in code
+ *   - Changed **{function}()** to **{function}** in config message
+ *   - Now highlights just "query" in code, not "query()"
+ *   - Works correctly with query(null, qry), sumQuery(null, qry), etc.
+ * - Both fixes ensure examples with /* comments */ work properly
+ * - Cache-busting updated to v=3.44
+ *
+ * v3.43 BUG FIXES - RULES 2, 3, 4:
+ * - Rule 2 (queryFunctions): Added **{function}()** markers to enable color coding
+ * - Rule 3 (uniqueKey): Added **uniqueKey()** to message to highlight function in code
+ * - Rule 4 (variableNaming): Fixed pattern to detect DSL assignments without var/let/const
+ *   - OLD: Only matched "var varName =", "let varName =", "const varName ="
+ *   - NEW: Matches both JavaScript style AND DSL style "varName ="
+ *   - Now works with block(user_name = "John", Product_ID = 123, ...)
+ * - All three rules now properly highlight and detect issues
+ * - Cache-busting updated to v=3.43
+ *
+ * v3.42 SIMPLIFICATION - REMOVED REDUNDANT PLAIN TEXT SUGGESTIONS:
+ * - Removed "Suggestions (Plain Text)" section - redundant with HTML color-coded output
+ * - Removed "Copy Suggestions" button - HTML output is superior
+ * - Plain text always showed BOTH Traditional and Method forms (not configurable)
+ * - HTML color-coded output now respects form selection (Traditional/Method)
+ * - Cleaner, simpler UI with less confusion
+ * - Removed JavaScript references: generateSuggestionsWithBothForms() calls, suggestionOutput clearing
+ * - Users can copy from HTML output or "Suggestions Applied" section (already has copy button)
+ * - Cache-busting updated to v=3.42
+ *
+ * v3.41 ENHANCEMENT - HTML OUTPUT HONORS DISPLAY FORM SELECTION:
+ * - HTML color-coded suggestions now respect Traditional/Method form selection
+ * - When you select Traditional or Method, BOTH plain text and HTML outputs update
+ * - Simplified Display Form labels: "Traditional" and "Method" (removed code examples)
+ * - New updateDisplayForm() function updates both HTML and applied suggestions
+ * - HTML output now shows only selected form instead of both forms
+ * - Better UX: One selection controls all outputs consistently
+ * - Modified generateSuggestionsWithColorCoding() to accept selectedForm parameter
+ * - Cache-busting updated to v=3.41
+ *
+ * v3.40 CRITICAL FIX - CORRECT ALL EXAMPLES TO USE block():
+ * - Fixed ALL rule examples to properly wrap multi-statement expressions in block()
+ * - CRITICAL DSL SYNTAX RULE: All multi-statement expressions MUST be within block()
+ * - Previous examples were INVALID - had multiple statements without block()
+ * - ALL 8 examples now corrected:
+ *   - divisionOperations: block(result1 = total / count, result2 = price / quantity)
+ *   - queryFunctions: block(result = query(...), total = sumQuery(...), avg = averageQuery(...))
+ *   - uniqueKey: block(recordKey = uniqueKey(...), itemKey = uniqueKey(...))
+ *   - variableNaming: block(user_name = "John", Product_ID = 123, MY_CONSTANT = "test")
+ *   - nonOptimalNodeAccess: block(value = ParentSeason.Name, color = ColorSpecification.Code, ...)
+ *   - nullAccessProtection: block(userName = user.name, itemCode = product.code, ...)
+ *   - mathOperationsParens: block(result = a + b * c, value = x - y / z)
+ *   - extraneousBlocks: (intentionally shows problematic code for this rule)
+ * - Updated DSL-SYNTAX-RULES.md with even more prominent warnings
+ * - Added CRITICAL comment in code: "All multi-statement expressions MUST be wrapped in block()"
+ * - This is the CORRECT DSL syntax that must be used
+ *
+ * v3.39 ENHANCEMENT - NEW RULES REFERENCE POPUP:
+ * - "Show All Possible Suggestions" now displays in a professional popup modal
+ * - Each rule displayed as a card with:
+ *   - Rule title and enabled/disabled status badge
+ *   - Brief description of what the rule checks
+ *   - Suggestion message that will be shown
+ *   - Example code that triggers the rule
+ *   - "Copy Example" button for each rule
+ * - Popup features:
+ *   - Professional styling with dark code blocks
+ *   - Scrollable content for all 8 rules
+ *   - Close button and click-outside-to-close
+ *   - One-click copy to clipboard for testing examples
+ * - All 8 rules have real, working examples:
+ *   - divisionOperations: total / count
+ *   - queryFunctions: query(), sumQuery(), averageQuery()
+ *   - uniqueKey: uniqueKey("xxColorRecord")
+ *   - variableNaming: user_name, Product_ID
+ *   - nonOptimalNodeAccess: ParentSeason.Name
+ *   - nullAccessProtection: user.name without null check
+ *   - mathOperationsParens: a + b * c
+ *   - extraneousBlocks: unnecessary block() wrappers
+ * - Much better UX than previous plain text output
+ * - New functions: closeRulesPopup(), copyRuleExample()
+ * - Cache-busting updated to v=3.39
+ *
+ * v3.38 FIX - CORRECT RULE 3 TO MATCH ACTUAL DSL SYNTAX:
+ * - Fixed Rule 3 to detect actual uniqueKey() function calls instead of invalid "UniqueKey: field" syntax
+ * - OLD pattern: /UniqueKey\s*:\s*(\w+)/gi (never matched real DSL code)
+ * - NEW pattern: /uniqueKey\s*\(\s*["']([^"']+)["']\s*\)/gi
+ * - Now detects: uniqueKey("xxColorRecord"), uniqueKey("xxItemID"), etc.
+ * - Extracts string argument and validates it ends with "ID" (case-insensitive)
+ * - Updated config message: "must end with 'ID', e.g., xxRecordID, xxItemID"
+ * - Updated description: "uniqueKey() function argument naming convention"
+ * - Rule now actually works with real DSL code!
+ * - Created test file with proper uniqueKey() syntax examples
+ * - Cache-busting updated to v=3.38
+ *
+ * v3.37 ENHANCEMENT - ADD COLOR CODING TO REMAINING RULES:
+ * - Added color coding support to Rules 4, 5, 7, 8 for consistency
+ * - Rule 4 (variableNaming): Added _instanceCounter, **{varName}** and **{correctedName}** markers
+ * - Rule 5 (nonOptimalNodeAccess): Added _instanceCounter, **{library}** marker
+ * - Rule 7 (mathOperationsParens): Added _instanceCounter
+ * - Rule 8 (extraneousBlocks): Added _instanceCounter
+ * - All 8 rules now have consistent color coding infrastructure
+ * - Multiple instances of same rule type now display in different colors (Red, Blue, Green, Orange, Purple, Pink)
+ * - Improved UX: easier to distinguish between multiple suggestions of same type
+ * - Updated dslRules.js and dslSuggestionsConfig.js
+ * - Cache-busting updated to v=3.37
+ *
+ * v3.36 UPDATE - SIMPLIFY QUERY FUNCTION MESSAGE:
+ * - Changed message back to simpler singular form
+ * - Message now: "Ensure query based Attribute Expression is set as One-Time / No-Copy as per best practices"
+ * - Removed {function} placeholder (no color highlighting of function names)
+ * - Changed "Attributes" (plural) to "Attribute" (singular)
+ * - Removed comma before "as per best practices"
+ * - Simpler, cleaner message
+ * - Cache-busting updated to v=3.36
+ *
+ * v3.35 FIX - CORRECT RULE 3 (UNIQUEKEY) CONFIG MISMATCH:
+ * - Fixed critical config/implementation mismatch in Rule 3
+ * - OLD config: "Ensure uniqueKey() expression is set to One-Time and No-Copy flags"
+ * - NEW config: "UniqueKey field **{field}** should follow naming convention (e.g., RecordID, ItemID)"
+ * - Config now accurately describes what the rule actually does
+ * - Rule checks: UniqueKey: FieldName (field must match pattern [A-Z][a-zA-Z0-9]*ID)
+ * - Added _instanceCounter for color coding support
+ * - Added **markers** around {field} placeholder for color highlighting
+ * - Updated description to match implementation
+ * - Cache-busting updated to v=3.35
+ *
+ * v3.34 FIX - RESTORE COLOR HIGHLIGHTING FOR QUERY FUNCTIONS:
+ * - Re-added **{function}()** placeholder to enable color highlighting
+ * - Message now: "Ensure Attributes with query based Expressions **{function}()** are set as One-Time / No-Copy, as per best practices."
+ * - Each query function (query, sumQuery, countQuery, etc.) gets highlighted in different color
+ * - Combines v3.33 message clarity with v3.30 color highlighting functionality
+ * - Cache-busting updated to v=3.34
+ *
+ * v3.33 UPDATE - REFINE QUERY FUNCTION SUGGESTION MESSAGE:
+ * - Updated wording for better clarity
+ * - Message now: "Ensure Attributes with query based Expressions are set as One-Time / No-Copy, as per best practices."
+ * - Changed "Attribute Expression" (singular) to "Attributes with query based Expressions" (plural)
+ * - Added comma before "as per best practices" for proper punctuation
+ * - Cache-busting updated to v=3.33
+ *
+ * v3.32 UPDATE - SIMPLIFY QUERY FUNCTION SUGGESTION MESSAGE:
+ * - Changed to generic "Expression" instead of specific function name
+ * - Message now: "Ensure query based Attribute Expression is set as One-Time / No-Copy as per best practices"
+ * - Simpler, more consistent messaging across all query function types
+ * - Note: Removed {function} placeholder and **markers** for cleaner message
+ * - Cache-busting updated to v=3.32
+ *
+ * v3.31 UPDATE - IMPROVE QUERY FUNCTION SUGGESTION MESSAGE:
+ * - Updated suggestion message for better clarity
+ * - Changed from: "Ensure setting {function}() as One-Time / No-Copy for better performance"
+ * - Changed to: "Ensure query based Attribute {function}() is set as One-Time / No-Copy as per best practices"
+ * - More professional and aligned with best practices terminology
+ * - Maintains color coding with **markers** around function name
+ * - Cache-busting updated to v=3.31
+ *
+ * v3.30 FIX - ENABLE COLOR HIGHLIGHTING FOR QUERY FUNCTIONS:
+ * - Added **markers** to query function names in suggestion message
+ * - Query function names now highlighted with colors in HTML output
+ * - Config change: suggestion message now wraps {function}() in ** markers
+ * - Enables color coding system to highlight function names
+ * - Each query function gets distinct color (Red, Blue, Green, Orange, Purple, Pink)
+ * - Fixed: suggestion: "Ensure setting **{function}()** as \"One-Time / No-Copy\""
+ * - Cache-busting updated to v=3.30
+ *
+ * v3.29 ENHANCEMENT - ADD COLOR CODING TO QUERY FUNCTIONS:
+ * - Added instance counter to queryFunctions rule (Rule 2)
+ * - Each query function now gets a distinct color in HTML output
+ * - Color palette cycles through: Red, Blue, Green, Orange, Purple, Pink
+ * - Matches existing behavior of other rules (e.g., divisionOperations, nullAccessProtection)
+ * - Benefits:
+ *   - Easier to distinguish between multiple query functions in same code
+ *   - Visual consistency across all rules
+ *   - Better user experience when reviewing suggestions
+ * - Changes: Updated dslRules.js queryFunctions rule with _instanceCounter and instanceNumber
+ * - Created test-query-color-coding.dsl test file with complex query examples
+ *
+ * v3.28 FIX - REMOVE IRRELEVANT PATTERNS FROM RULE 2 (QUERY FUNCTIONS):
+ * - Removed inefficientPatterns from queryFunctions rule configuration
+ * - Patterns (.filter().first(), .filter().count(), .map().filter()) had nothing to do with query-based functions
+ * - Rule 2 now ONLY focuses on detecting query functions (averageQuery, countQuery, maxQuery, etc.)
+ * - Suggests setting query functions as "One-Time / No-Copy" for performance
+ * - Simplified rule implementation by removing SECONDARY FEATURE code block
+ * - Cache-busting updated to v=3.29
+ *
+ * v3.27 FIX - RESTORE DUAL FORM DISPLAY (TRADITIONAL AND METHOD):
+ * - Added hasDifferentForms back to all 4 rules with fixTemplates
+ * - Set fixable: true for display purposes (shows both Traditional and Method forms)
+ * - Advisory mode (autoFixEnabled: false) remains active - no auto-apply
+ * - Rules updated: divisionOperations, variableNaming, nullAccessProtection, extraneousBlocks
+ * - UI now displays both forms even in advisory-only mode
+ * - Users can see both Traditional (ifNaN(x, y)) and Method ((x).ifNaN(y)) options
+ * - Cache-busting updated to v=3.27
+ *
+ * v3.26 MAJOR CHANGE - ADVISORY-ONLY MODE & IMPROVED DIVISION DETECTION:
+ * - Disabled autofix for ALL rules (all rules now advisory-only, suggestions without auto-apply)
+ * - Changed all rules from "fixable" to "advisory" in suggestionType
+ * - Users review suggestions and manually apply changes
+ *
+ * Division Detection Improvements:
+ * - Completely rewrote divisionOperations rule to detect ANY division operator
+ * - Extracts COMPLETE formula/expression containing the division
+ * - Expression boundaries: stops at delimiters (=, comma, opening/closing parens)
+ * - Examples:
+ *   - ratio = ((revenue + 10) / days) + 3 → extracts "((revenue + 10) / days) + 3"
+ *   - someFunction(x / y) → extracts "x / y"
+ *   - block(ratio = formula / value, other) → extracts "formula / value"
+ * - Suggests wrapping entire extracted expression with ifNaN()
+ * - Detects complex expressions, nested operations, literals
+ * - Prevents duplicate suggestions for same expression
+ * - Skips if already wrapped in ifNaN, catch, ifNull, safeDivide
+ * - Skips divisions in strings and comments
+ *
+ * Implementation:
+ * - New _extractExpression() function finds formula boundaries
+ * - Simplified _isAlreadyWrapped() to work with full expressions
+ * - Updated suggestion message: "Division detected in expression. Wrap entire formula..."
+ * - All 8 rules: autoFixEnabled: false
+ * - Cache-busting updated to v=3.26
+ *
+ * v3.25 FEATURE - SEQUENCED PLACEHOLDERS FOR DIVISION BY ZERO:
+ * - Changed placeholder from DEFAULT_VALUE to rule-specific DEF_VAL_NULL_SAFETY_N
+ * - Each nullAccessProtection instance gets unique sequence number
+ * - Examples:
+ *   - First instance: ifNull(xxDefQuote.imageList, DEF_VAL_NULL_SAFETY_1)
+ *   - Second instance: ifNull(xxAltQuote.someString, DEF_VAL_NULL_SAFETY_2)
+ *   - Third instance: ifNull(order.customer, DEF_VAL_NULL_SAFETY_3)
+ * - Sequence resets at start of each analysis (line 1)
+ * - Benefits:
+ *   - Clear which placeholder corresponds to which fix
+ *   - Can replace each with different appropriate values
+ *   - Rule name in placeholder shows what protection is being applied
+ * - Implementation:
+ *   - Added _instanceCounter property to nullAccessProtection rule
+ *   - Counter resets to 0 at lineNumber === 1
+ *   - Incremented for each suggestion created
+ *   - instanceNumber added to suggestion object
+ *   - fix() uses instanceNumber to generate DEF_VAL_NULL_SAFETY_N
+ * - Changes: Updated dslRules.js with instance tracking and sequenced placeholder generation
+ * - Cache-busting updated to v=3.24 for all script loads
+ *
+ * v3.23 CHANGE - DEFAULT_VALUE PLACEHOLDER + CACHE BUSTING:
+ * - Changed from smart default detection to static DEFAULT_VALUE placeholder
+ * - Autofix now uses literal "DEFAULT_VALUE" text instead of type-specific defaults
+ * - User must manually replace DEFAULT_VALUE with appropriate value
+ * - Examples:
+ *   - Traditional: ifNull(xxDefQuote.imageList, DEFAULT_VALUE)
+ *   - Method: (xxDefQuote.imageList).ifNull(DEFAULT_VALUE)
+ * - Clearer indicator that user needs to provide the actual default value
+ * - Smart detection logic (_getSmartDefaultValue) remains in code but unused
+ * - Added cache-busting query parameters (?v=3.23) to script tags to force reload
+ * - Changes: Updated fix() to use 'DEFAULT_VALUE' instead of smart detection
+ * - Changes: Added version query params to dslSuggestionsEngine.js and dslSuggestionsApp.js
+ *
+ * v3.22 FEATURE - SMART DEFAULT VALUES:
+ * - Implemented smart default value detection for ifNull() autofix
+ * - Analyzes property names to determine appropriate default values
+ * - String patterns (name, title, text, string, etc.) → ""
+ * - Numeric patterns (count, id, quantity, index, etc.) → 0
+ * - Array patterns (list, items, elements, array, etc.) → []
+ * - Object patterns (map, data, object, config, etc.) → {}
+ * - Boolean patterns (flag, is, has, enabled, active, etc.) → false
+ * - Date/Time patterns (date, time, timestamp) → null
+ * - Examples:
+ *   - xxDefQuote.imageList → ifNull(xxDefQuote.imageList, [])
+ *   - order.customer.name → ifNull(order.customer.name, "")
+ *   - product.inventory.quantity → ifNull(product.inventory.quantity, 0)
+ * - Replaces static "ref, string, etc." placeholder with intelligent defaults
+ * - Changes: Added _getSmartDefaultValue() helper function in dslRules.js
+ * - Updated fix() to call _getSmartDefaultValue(property) instead of using config value
+ *
+ * v3.21 BUG FIX - AUTOFIX FUNCTIONALITY:
+ * - Fixed nullAccessProtection autofix not working in "Suggestions Applied" output
+ * - Issue: fix() function required suggestion.fixed property but check() never set it
+ * - Solution: Updated fix() to calculate fix from templates (like divisionOperations does)
+ * - fix() now gets fixStyle (traditional/method) from config or UI selection
+ * - Applies fixTemplates with placeholder replacement for {object}, {property}, {expression}, {defaultAltValue}
+ * - Traditional form: ifNull(xxDefQuote.imageList, ref, string, etc.)
+ * - Method form: (xxDefQuote.imageList).ifNull(ref, string, etc.)
+ * - Autofix now properly applies null protection to code
+ * - Changes: Rewrote nullAccessProtection fix() function in dslRules.js
+ *
+ * v3.20 UX IMPROVEMENT - CODE LINE COLOR CODING:
+ * - Applied color coding to the code statements themselves, not just suggestions
+ * - Objects highlighted in suggestions now also highlighted in the code line
+ * - Same color used for object in both code line and its suggestion
+ * - Example: xxDefQuote.imageList.add(xxAltQuote.someString)
+ *   - xxDefQuote highlighted in red in both code and suggestion
+ *   - xxAltQuote highlighted in blue in both code and suggestion
+ * - Makes it easy to see which object each suggestion refers to
+ * - Plain text output unchanged - only HTML output has color coding
+ * - Changes: Updated generateSuggestionsWithColorCoding to colorize code lines
+ * - Added extractHighlightedObjects() and colorizeCodeLine() helper functions
+ *
+ * v3.19 UX IMPROVEMENT - COLOR CYCLING:
+ * - Each instance of the same rule now gets a distinct color in HTML output
+ * - Color palette: Red, Blue, Green, Orange, Purple, Pink (6 colors)
+ * - Colors cycle through palette for multiple instances of same rule
+ * - Different rules can reuse the same color palette
+ * - Example: First nullAccessProtection = Red, Second = Blue, Third = Green, etc.
+ * - Helps distinguish between multiple instances of same rule type
+ * - Changes: Added 6 CSS color classes (highlight-object-1 through 6)
+ * - Updated generateSuggestionsWithColorCoding to track rule instance counts
+ *
+ * v3.18 UX IMPROVEMENT - DUAL OUTPUT:
+ * - Added second output box showing HTML version with color coding
+ * - Plain text output (Option A): Original textarea with ** markers for highlighting
+ * - HTML output (Option C): Color-coded version highlighting objects at risk in red
+ * - Both outputs display simultaneously for easy comparison
+ * - Temporary feature to help determine which highlighting approach works best
+ * - Color coding converts **object** markers to red bold text in HTML output
+ * - Changes: Added htmlOutput div, generateSuggestionsWithColorCoding function
+ * - Updated clearSuggestionInput to clear both outputs
+ *
+ * v3.17 RULE REFINEMENT:
+ * - Refined nullAccessProtection rule to distinguish property access from function calls
+ * - Issue: Rule was flagging function calls like imageList.add( as null concerns
+ * - Added logic to skip function calls by checking if property is followed by opening parenthesis
+ * - Function calls like object.method( are now skipped (not a null concern)
+ * - Property access like object.property still flagged (null concern remains)
+ * - Enhanced suggestion message to highlight object at risk using **bold** markers
+ * - Example: "Add null protection for **xxDefQuote** when accessing .imageList"
+ * - Users can now see exactly which object could be null in the access chain
+ * - Result: More accurate null safety suggestions focused on actual property access risks
+ *
+ * v3.16 UX IMPROVEMENT:
+ * - Updated labels to shorter, more concise versions per user request
+ * - Labels: "Div By 0", "Query", "UniqueKey", "Var Naming", "Node Perf", "Null Safety", "Math Clarity", "Extraneous Block"
+ * - Fixed single-form fixable rules showing duplicate Traditional/Method suggestions
+ * - Issue: variableNaming and extraneousBlocks are fixable but have identical Traditional/Method forms
+ * - Added hasDifferentForms property to all suggestion objects
+ * - Logic: Compare fixTemplates.traditional vs fixTemplates.method
+ * - UI now checks: if fixable AND hasDifferentForms, show both forms; else show single suggestion
+ * - Result: extraneousBlocks now shows "/* SUGGESTION - Extraneous Block: ... */" (single)
+ * - Fixed extraneousBlocks using hardcoded fixable: false instead of config's autoFixEnabled
+ * - Cleaner, more consistent suggestion display across all rule types
+ *
+ * v3.15 UX IMPROVEMENT:
+ * - Added labels to all suggestions for better clarity
+ * - Each rule now has a brief label identifying the suggestion type
+ * - Labels added to config: Division Safety, Query Performance, UniqueKey Config,
+ *   Naming Convention, Node Performance, Null Safety, Math Clarity, Code Cleanup
+ * - Suggestion display format:
+ *   - Advisory: "/* SUGGESTION - Query Performance: Ensure setting query()... */"
+ *   - Fixable: "/* SUGGESTION - Division Safety (Traditional): Use ifNaN... */"
+ *   - Fixable: "/* SUGGESTION - Division Safety (Method): Use ifNaN... */"
+ * - Users can now immediately identify what type of issue each suggestion addresses
+ * - Removed hardcoded 'fixed' property from mathOperationsParens rule
+ * - All suggestion objects now include label property from config
+ *
+ * v3.14 UX IMPROVEMENT:
+ * - Fixed duplicate suggestions display for advisory rules
+ * - Issue: Advisory rules (queryFunctions, uniqueKey, etc.) showed duplicate suggestions
+ * - Example: Two identical "/* SUGGESTION (Traditional/Method): ... */" comments
+ * - Root cause: UI showed both Traditional and Method forms for ALL rules
+ * - Traditional vs Method forms only make sense for FIXABLE rules (different outputs)
+ * - Advisory rules have no auto-fix, so both forms are identical
+ * - Solution: Check suggestion.fixable property before displaying
+ * - Fixable rules: Show both Traditional and Method forms (user can choose)
+ * - Advisory rules: Show single "/* SUGGESTION: ... */" comment
+ * - Reduces visual clutter and confusion for advisory-only suggestions
+ *
+ * v3.13 BUG FIX (CRITICAL):
+ * - Fixed queryFunctions rule - completely rewritten to match intended purpose
+ * - Issue: Rule was detecting inefficient patterns (.filter().first()) instead of query functions
+ * - Rule ignored functionNames array (averageQuery, countQuery, maxQuery, etc.)
+ * - Rule ignored config suggestion message with {function} placeholder
+ * - PRIMARY FEATURE: Now detects query function names from functionNames array
+ * - Builds dynamic regex: \b(averageQuery|countQuery|...|weightedAverageQuery)\s*\(
+ * - Replaces {function} placeholder with actual function name found
+ * - Example: "averageQuery(...)" → "Ensure setting averageQuery() as 'One-Time / No-Copy'..."
+ * - SECONDARY FEATURE: Kept inefficientPatterns as bonus feature (optional)
+ * - Rule now properly implements its documented purpose
+ *
+ * v3.12 BUG FIX (CRITICAL):
+ * - Fixed similar issues in nullAccessProtection and variableNaming rules
+ * - nullAccessProtection Issue 1: Missing {expression} placeholder replacement
+ * - nullAccessProtection Issue 2: Hardcoded fixed property bypassing fix() function
+ * - Added expression variable and {expression} to replacePlaceholders
+ * - Removed hardcoded fixed property (object + '?.' + property)
+ * - variableNaming Issue: Placeholder mismatch - config used {correctedNames} but rule replaced {varName}
+ * - Added {correctedName} to replacePlaceholders with camelCaseName value
+ * - Removed hardcoded fixed property from variableNaming
+ * - Updated config message to use both {varName} and {correctedName}
+ * - Both rules now use dynamic fix() function like divisionOperations
+ *
+ * v3.11 BUG FIX (CRITICAL):
+ * - Fixed JavaScript number-to-string conversion losing .0 precision
+ * - Issue: Applied code showed ifNaN(x, 0) instead of ifNaN(x, 0.0)
+ * - Root cause: Config had defaultAltValue: 0.0 (number), JavaScript converts to "0" in string concat
+ * - JavaScript behavior: "test " + 0.0 results in "test 0", not "test 0.0"
+ * - Solution: Changed defaultAltValue from 0.0 (number) to "0.0" (string) in config
+ * - Applied suggestions now correctly show: ifNaN(revenue / quantity, 0.0)
+ * - Preserves double precision indicator for DSL code standards
+ *
+ * v3.10 BUG FIX (CRITICAL):
+ * - Fixed {expression} placeholder not being replaced in suggestion messages
+ * - Removed hardcoded 'fixed' property with 0 instead of config's defaultAltValue
+ * - Issue 1: Messages showed "Use ifNaN({expression}, 0.0)" literally instead of actual expression
+ * - Issue 2: Applied code used 0 instead of config's 0.0 due to hardcoded fixed property
+ * - Added {expression} to replacePlaceholders call in check() function
+ * - Removed hardcoded fixed property - fix() function generates correct code dynamically
+ * - Suggestion messages now show actual expression: "Use ifNaN(revenue / quantity, 0.0)"
+ * - Applied code now correctly uses config's defaultAltValue (0.0, not 0)
+ *
+ * v3.09 BUG FIX (CRITICAL):
+ * - Fixed triple-wrapping bug when multiple identical expressions exist
+ * - Issue: block(revenue/quantity, revenue/quantity, revenue/quantity) wrapped each 3 times
+ * - Root cause: fix() used global replace, so subsequent calls found pattern inside wrapped code
+ * - Solution: Modified fix() to check each occurrence with _isAlreadyWrapped before replacing
+ * - Now processes line-by-line and only replaces unwrapped occurrences
+ * - Multiple identical expressions now correctly wrap once each, not recursively
+ *
+ * v3.08 BUG FIX (CRITICAL):
+ * - Implemented missing skipIfWrappedIn logic in divisionOperations rule
+ * - Rule now properly skips divisions already wrapped in ifNaN, catch, ifNull, or safeDivide
+ * - Fixes double-wrapping bug: (revenue / quantity).ifNaN(0.0) → ((revenue / quantity).ifNaN(0)).ifNaN(0.0)
+ * - Added _isAlreadyWrapped helper function that checks both traditional and method forms
+ * - Traditional check: ifNaN(x / y, 0)
+ * - Method check: (x / y).ifNaN(0)
+ * - Config skipIfWrappedIn setting now functional
+ *
+ * v3.07 BUG FIX (CRITICAL):
+ * - Fixed defaultAltValue hardcoded fallback in divisionOperations rule
+ * - Removed `|| 0` pattern that was converting 0.0 (double) to 0 (integer)
+ * - Config now properly controls default value (e.g., 0.0 preserved as 0.0)
+ * - Fixed config key references in dslRules.js (removed "Rule" suffixes)
+ * - All 7 affected rules (queryFunctions, uniqueKey, variableNaming, nonOptimalNodeAccess,
+ *   nullAccessProtection, mathOperationsParens, extraneousBlocks) now properly load config
+ * - This completes the v3.06 fix which updated config but not the rules file
+ *
+ * v3.06 BUG FIX (MAJOR):
+ * - Fixed config key mismatch affecting 7 out of 8 rules
+ * - Renamed all config keys to match rule names (removed "Rule" suffix)
+ * - queryFunctionsRule → queryFunctions
+ * - uniqueKeyRule → uniqueKey
+ * - variableNamingRule → variableNaming
+ * - nonOptimalNodeAccessRule → nonOptimalNodeAccess
+ * - nullAccessProtectionRule → nullAccessProtection
+ * - mathOperationsParensRule → mathOperationsParens
+ * - extraneousBlocksRule → extraneousBlocks
+ * - All 8 rules now properly load their configurations
+ *
+ * v3.05 BUG FIX:
+ * - Fixed divisionOperations rule always using Traditional form
+ * - Rule now properly respects fixStyle (traditional vs method) from config
+ * - fix() function now dynamically generates code using correct template
+ * - Method radio button now correctly outputs: (expression).ifNaN(0)
+ * - Rules v1.00 → v1.01
+ *
+ * v3.04 BUG FIX:
+ * - Fixed radio button not triggering update
+ * - Added updateAppliedSuggestions to global window exports
+ * - Radio buttons now properly update Suggestions Applied section
+ *
+ * v3.03 UX IMPROVEMENT:
+ * - Moved radio selector from Suggestions to Suggestions Applied section
+ * - Suggestions now always show BOTH Traditional and Method forms
+ * - Radio selector controls only the Applied Suggestions output
+ * - Improved educational value - users see both options
+ * - Fixed "duplicate suggestions" issue (now intentionally showing both)
+ *
+ * v3.02 BUG FIX:
+ * - Added explicit "enabled: true" to all 8 rules in config
+ * - Fixed rules not firing due to missing enabled property
+ * - Rules now properly inherit from defaults while maintaining explicit enabled flag
+ *
+ * v3.01 VERSION STRATEGY:
+ * - Established simplified versioning approach
+ * - Removed version headers from config and utility files
+ * - Kept versions only in App HTML, Engine, and Rules
+ *
  * v3.00 OPTIMIZATIONS:
  * - ARCHITECTURE: Consolidated 8 rule files → 1 file (dslRules.js)
  * - ARCHITECTURE: Trimmed utilities from 440 → 120 lines
@@ -39,7 +578,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.00
+            Version: v3.50
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>
@@ -49,26 +588,24 @@
             <button onclick="getSuggestions()">Get Suggestions</button>
             <button onclick="showAllPossibleSuggestions()">Show All Possible Suggestions</button>
             <button onclick="clearSuggestionInput()">Clear Input</button>
-            <button onclick="copyToClipboard('suggestionOutput')">Copy Suggestions</button>
         </div>
-        
-        <div style="margin-top: 20px; margin-bottom: 10px;">
-            <label for="suggestionOutput" style="display: block; margin-bottom: 5px;">Suggestions:</label>
-            <div style="margin-bottom: 8px; padding: 8px; background: #f5f5f5; border-radius: 4px;">
-                <span style="font-weight: bold; margin-right: 15px;">Display Form:</span>
-                <label style="margin-right: 15px; cursor: pointer;">
-                    <input type="radio" name="suggestionForm" id="showTraditionalForm" value="traditional" checked onchange="updateSuggestionDisplay()">
-                    Traditional (ifNaN(x, 0))
-                </label>
-                <label style="cursor: pointer;">
-                    <input type="radio" name="suggestionForm" id="showMethodForm" value="method" onchange="updateSuggestionDisplay()">
-                    Method ((x).ifNaN(0))
-                </label>
-            </div>
+
+        <div style="margin-top: 20px; margin-bottom: 8px; padding: 8px; background: #f5f5f5; border-radius: 4px;">
+            <span style="font-weight: bold; margin-right: 15px;">Display Form:</span>
+            <label style="margin-right: 15px; cursor: pointer;">
+                <input type="radio" name="suggestionForm" id="showTraditionalForm" value="traditional" checked onchange="updateDisplayForm()">
+                Traditional
+            </label>
+            <label style="cursor: pointer;">
+                <input type="radio" name="suggestionForm" id="showMethodForm" value="method" onchange="updateDisplayForm()">
+                Method
+            </label>
         </div>
-        <div id="suggestionOutput" class="code-output" data-placeholder="Suggestions will appear here..."></div>
-        
-        <label for="suggestionsApplied">Suggestions Applied to Formatted Expression:</label>
+
+        <label for="htmlOutput" style="display: block; margin-bottom: 10px;">Suggestions (HTML with Color Coding):</label>
+        <div id="htmlOutput" class="code-output html-output" data-placeholder="Color-coded suggestions will appear here..."></div>
+
+        <label for="suggestionsApplied" style="display: block; margin-top: 20px; margin-bottom: 5px;">Suggestions Applied to Formatted Expression:</label>
         <div style="position: relative;">
             <div id="suggestionsApplied" class="code-output" data-placeholder="Code with suggestions applied will appear here..."></div>
             <div style="text-align: right; margin-top: 5px;">
@@ -85,8 +622,8 @@
     - Faster page load: 4 HTTP requests instead of 10+
     -->
 
-    <script src="dslSuggestionsEngine.js" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
-    <script src="dslSuggestionsApp.js"></script>
+    <script src="dslSuggestionsEngine.js?v=3.50&t=1762264000" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
+    <script src="dslSuggestionsApp.js?v=3.50&t=1762264000"></script>
 
     <style>
         /* v3.00 - Simplified styles, removed all popup-related CSS */
@@ -113,6 +650,41 @@
             font-style: italic;
         }
 
+        .html-output {
+            background-color: #fff;
+            line-height: 1.6;
+        }
+
+        .html-output .highlight-object-1 {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+
+        .html-output .highlight-object-2 {
+            color: #1976d2;
+            font-weight: bold;
+        }
+
+        .html-output .highlight-object-3 {
+            color: #388e3c;
+            font-weight: bold;
+        }
+
+        .html-output .highlight-object-4 {
+            color: #f57c00;
+            font-weight: bold;
+        }
+
+        .html-output .highlight-object-5 {
+            color: #7b1fa2;
+            font-weight: bold;
+        }
+
+        .html-output .highlight-object-6 {
+            color: #c2185b;
+            font-weight: bold;
+        }
+
         .container {
             width: 100%;
             max-width: none;
@@ -126,6 +698,172 @@
             max-width: 100%;
         }
 
+        /* Rules Popup Styles */
+        .rules-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: auto;
+        }
+
+        .rules-popup-content {
+            background: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .rules-popup-header {
+            padding: 20px;
+            border-bottom: 2px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8f9fa;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .rules-popup-header h2 {
+            margin: 0;
+            color: #333;
+            font-size: 1.5em;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 2em;
+            color: #666;
+            cursor: pointer;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .close-button:hover {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+
+        .rules-popup-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .rule-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .rule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .rule-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .rule-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .rule-status.enabled {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .rule-status.disabled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .rule-description {
+            color: #555;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .rule-message {
+            background: #fff;
+            border-left: 4px solid #007bff;
+            padding: 10px;
+            margin-bottom: 12px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        .rule-example-section {
+            margin-top: 12px;
+        }
+
+        .rule-example-header {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .rule-example-code {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 12px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            white-space: pre;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .copy-example-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: background-color 0.2s;
+        }
+
+        .copy-example-btn:hover {
+            background: #0056b3;
+        }
+
+        .copy-example-btn:active {
+            background: #004085;
+        }
+
         /* Responsive design for smaller screens */
         @media (max-width: 768px) {
             textarea, .code-output {
@@ -137,5 +875,19 @@
             }
         }
     </style>
+
+    <!-- Rules Reference Popup -->
+    <div id="rulesPopup" class="rules-popup" style="display: none;">
+        <div class="rules-popup-content">
+            <div class="rules-popup-header">
+                <h2>DSL Suggestions - All Rules Reference</h2>
+                <button class="close-button" onclick="closeRulesPopup()">&times;</button>
+            </div>
+            <div class="rules-popup-body" id="rulesPopupBody">
+                <!-- Rules will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
