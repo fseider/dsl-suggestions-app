@@ -595,38 +595,53 @@ function showAllPossibleSuggestions() {
     var rules = dslSuggestionsConfigData.suggestionRules;
 
     // Examples for each rule
+    // CRITICAL: All multi-statement expressions MUST be wrapped in block()
     var ruleExamples = {
         divisionOperations: `// Division that could fail if denominator is zero
-total / count
-price / quantity`,
+block(
+    result1 = total / count,
+    result2 = price / quantity
+)`,
 
         queryFunctions: `// Query functions impact performance
-result = query(null, qry)
-total = sumQuery(null, qry)
-avg = averageQuery(null, qry)`,
+block(
+    result = query(null, qry),
+    total = sumQuery(null, qry),
+    avg = averageQuery(null, qry)
+)`,
 
         uniqueKey: `// uniqueKey() arguments should end with "ID"
-recordKey = uniqueKey("xxColorRecord")
-itemKey = uniqueKey("xxItemId")`,
+block(
+    recordKey = uniqueKey("xxColorRecord"),
+    itemKey = uniqueKey("xxItemId")
+)`,
 
         variableNaming: `// Variables should use lowerCamelCase
-var user_name = "John"
-var Product_ID = 123
-var MY_CONSTANT = "test"`,
+block(
+    user_name = "John",
+    Product_ID = 123,
+    MY_CONSTANT = "test"
+)`,
 
         nonOptimalNodeAccess: `// Hierarchy node references in expressions
-value = ParentSeason.Name
-color = ColorSpecification.Code
-size = ProductSize.Value`,
+block(
+    value = ParentSeason.Name,
+    color = ColorSpecification.Code,
+    size = ProductSize.Value
+)`,
 
         nullAccessProtection: `// Property access without null checks
-userName = user.name
-itemCode = product.code
-totalPrice = order.total`,
+block(
+    userName = user.name,
+    itemCode = product.code,
+    totalPrice = order.total
+)`,
 
         mathOperationsParens: `// Complex math without parentheses
-result = a + b * c
-value = x - y / z`,
+block(
+    result = a + b * c,
+    value = x - y / z
+)`,
 
         extraneousBlocks: `// Unnecessary block() for single statement
 block(

@@ -1,10 +1,24 @@
 # DSL Syntax Rules
 
-**CRITICAL: Read this file before writing any DSL code examples or tests.**
+```
+═══════════════════════════════════════════════════════════════════
+  ⚠️  CRITICAL - READ BEFORE WRITING ANY DSL CODE  ⚠️
+═══════════════════════════════════════════════════════════════════
+```
+
+**This file contains MANDATORY syntax rules that must NEVER be violated.**
+
+**If you write DSL code without following these rules, it will be INVALID.**
 
 ---
 
-## **RULE 1: Multi-Statement Expressions**
+## **RULE 1: Multi-Statement Expressions (MOST IMPORTANT)**
+
+**IF YOU HAVE 2 OR MORE STATEMENTS, YOU MUST USE block()**
+
+Count your statements:
+- 1 statement → No block() needed
+- 2+ statements → **MUST USE block()** with comma separators
 
 ### ✅ CORRECT - All multi-statement expressions MUST be within block()
 

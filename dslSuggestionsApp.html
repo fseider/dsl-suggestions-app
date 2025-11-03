@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.39
+ * VERSION: v3.40
  * LAST UPDATED: 2025-11-03
  *
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -21,6 +21,23 @@
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
+ *
+ * v3.40 CRITICAL FIX - CORRECT ALL EXAMPLES TO USE block():
+ * - Fixed ALL rule examples to properly wrap multi-statement expressions in block()
+ * - CRITICAL DSL SYNTAX RULE: All multi-statement expressions MUST be within block()
+ * - Previous examples were INVALID - had multiple statements without block()
+ * - ALL 8 examples now corrected:
+ *   - divisionOperations: block(result1 = total / count, result2 = price / quantity)
+ *   - queryFunctions: block(result = query(...), total = sumQuery(...), avg = averageQuery(...))
+ *   - uniqueKey: block(recordKey = uniqueKey(...), itemKey = uniqueKey(...))
+ *   - variableNaming: block(user_name = "John", Product_ID = 123, MY_CONSTANT = "test")
+ *   - nonOptimalNodeAccess: block(value = ParentSeason.Name, color = ColorSpecification.Code, ...)
+ *   - nullAccessProtection: block(userName = user.name, itemCode = product.code, ...)
+ *   - mathOperationsParens: block(result = a + b * c, value = x - y / z)
+ *   - extraneousBlocks: (intentionally shows problematic code for this rule)
+ * - Updated DSL-SYNTAX-RULES.md with even more prominent warnings
+ * - Added CRITICAL comment in code: "All multi-statement expressions MUST be wrapped in block()"
+ * - This is the CORRECT DSL syntax that must be used
  *
  * v3.39 ENHANCEMENT - NEW RULES REFERENCE POPUP:
  * - "Show All Possible Suggestions" now displays in a professional popup modal
@@ -460,7 +477,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.39
+            Version: v3.40
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>
@@ -507,8 +524,8 @@
     - Faster page load: 4 HTTP requests instead of 10+
     -->
 
-    <script src="dslSuggestionsEngine.js?v=3.39&t=1762242000" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
-    <script src="dslSuggestionsApp.js?v=3.39&t=1762242000"></script>
+    <script src="dslSuggestionsEngine.js?v=3.40&t=1762244000" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
+    <script src="dslSuggestionsApp.js?v=3.40&t=1762244000"></script>
 
     <style>
         /* v3.00 - Simplified styles, removed all popup-related CSS */
