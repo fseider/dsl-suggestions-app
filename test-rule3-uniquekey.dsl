@@ -1,46 +1,26 @@
-// ================================================================
-// RULE 3 TEST: UniqueKey Function Detection
-// ================================================================
-// PURPOSE: Verify Rule 3 detects uniqueKey() function usage
-//          and suggests One-Time / No-Copy configuration
-//
-// EXPECTED: Suggestions for uniqueKey() usage
-// ================================================================
+/* Test file for Rule 3: UniqueKey function usage */
 
-// Test 1: Basic uniqueKey usage
+/* Example 1: Basic uniqueKey calls */
 block(
-    key1 = uniqueKey(),
-    result = key1
+	recordKey = uniqueKey("xxColorRecord"),
+	itemKey = format("{0,number,0000}", uniqueKey("xxItemId"))
 )
 
-// Test 2: uniqueKey with parameters
+/* Example 2: Multiple uniqueKey calls in one block */
 block(
-    recordKey = uniqueKey("Record"),
-    itemKey = uniqueKey("Item"),
-    vector(recordKey, itemKey)
+	productKey = uniqueKey("xxProductID"),
+	seasonKey = uniqueKey("xxSeasonID"),
+	categoryKey = uniqueKey("xxCategory")
 )
 
-// Test 3: Multiple uniqueKey calls in one block
-block(
-    id1 = uniqueKey(),
-    id2 = uniqueKey(),
-    id3 = uniqueKey(),
-    vector(id1, id2, id3)
-)
+/* Example 3: UniqueKey in various contexts */
+myRecord = uniqueKey("xxRecordID")
+customKey = uniqueKey("xxCustomKey")
+entityKey = uniqueKey("xxEntityID")
 
-// Test 4: uniqueKey in nested expression
-block(
-    result = someFunction(uniqueKey()),
-    result
+/* Example 4: Nested in expressions */
+result = block(
+	key1 = uniqueKey("xxFirstKey"),
+	key2 = uniqueKey("xxSecondID"),
+	combined = key1 + key2
 )
-
-// ================================================================
-// EXPECTED RESULTS
-// ================================================================
-// Each uniqueKey() should trigger suggestion:
-// "Ensure uniqueKey() expression is set to One-Time and No-Copy flags."
-//
-// Rule: uniqueKey
-// Label: UniqueKey
-// Type: advisory
-// ================================================================
