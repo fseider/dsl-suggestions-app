@@ -1,0 +1,14 @@
+# Instructions for Claude
+
+## CRITICAL: Change Authorization Protocol
+
+1. Only make changes explicitly requested by user
+2. If you notice issues/improvements:
+   - Describe the issue
+   - Propose options (A, B, C)
+   - WAIT for user approval
+   - Never assume or proceed without "yes" or "proceed"
+3. No unauthorized edits, no matter how "obvious" the fix seems
+
+## DSL Syntax Rules
+[Reference to DSL-SYNTAX-RULES.md]
