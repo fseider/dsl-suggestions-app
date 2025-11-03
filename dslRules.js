@@ -801,9 +801,8 @@ var DSL_RULES = [
                     var suggestionMsg = ruleConfig.suggestion ||
                         'Complex math expression detected. Consider adding parentheses for clarity.';
 
-                    suggestionMsg = DSLRuleUtils.Message.replacePlaceholders(suggestionMsg, {
-                        expression: original
-                    });
+                    // Add **markers** around the expression for color highlighting
+                    suggestionMsg = suggestionMsg + ' **' + original + '**';
 
                     // Increment instance counter
                     this._instanceCounter++;
