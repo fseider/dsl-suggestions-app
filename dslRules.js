@@ -795,11 +795,15 @@ var DSL_RULES = [
                 var hasParens = this._hasParentheses(lineWithoutStrings, position, match[0].length);
 
                 if (!hasParens) {
+                    var original = match[0];
+                    var fixed = match[1] + ' ' + match[2] + ' (' + match[3] + ' ' + match[4] + ' ' + match[5] + ')';
+
                     var suggestionMsg = ruleConfig.suggestion ||
                         'Complex math expression detected. Consider adding parentheses for clarity.';
 
-                    var original = match[0];
-                    var fixed = match[1] + ' ' + match[2] + ' (' + match[3] + ' ' + match[4] + ' ' + match[5] + ')';
+                    suggestionMsg = DSLRuleUtils.Message.replacePlaceholders(suggestionMsg, {
+                        expression: original
+                    });
 
                     // Increment instance counter
                     this._instanceCounter++;

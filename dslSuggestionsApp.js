@@ -648,7 +648,7 @@ function showAllPossibleSuggestions() {
 )`,
 
         nonOptimalNodeAccess: `block(
-    /* Hierarchy node references in expressions */
+    /* Hierarchy / Library Item node references in expressions */
     value = ParentSeason.Name,
     color = ColorSpecification.Code,
     size = ProductSize.Value

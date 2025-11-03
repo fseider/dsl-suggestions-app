@@ -139,7 +139,7 @@ var dslSuggestionsConfigData = {
       description: "Detect math operations that may need parentheses for clarity",
       severity: "info",
       suggestionType: "advisory",
-      suggestion: "Consider use of parens () to group math operations for clarity."
+      suggestion: "Consider use of parens () to group math operations for clarity: **{expression}**"
     },
 
     extraneousBlocks: {
