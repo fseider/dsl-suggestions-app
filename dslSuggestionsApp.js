@@ -723,10 +723,10 @@ function copyRuleExample(ruleName) {
         btn.textContent = 'Copied!';
         btn.style.background = '#28a745';
 
+        // Close popup after brief delay
         setTimeout(function() {
-            btn.textContent = originalText;
-            btn.style.background = '#007bff';
-        }, 1500);
+            closeRulesPopup();
+        }, 500);
     } catch (err) {
         alert('Failed to copy example');
     }
