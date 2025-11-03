@@ -597,54 +597,54 @@ function showAllPossibleSuggestions() {
     // Examples for each rule
     // CRITICAL: All multi-statement expressions MUST be wrapped in block()
     var ruleExamples = {
-        divisionOperations: `// Division that could fail if denominator is zero
-block(
+        divisionOperations: `block(
+    // Division that could fail if denominator is zero
     result1 = total / count,
     result2 = price / quantity
 )`,
 
-        queryFunctions: `// Query functions impact performance
-block(
+        queryFunctions: `block(
+    // Query functions impact performance
     result = query(null, qry),
     total = sumQuery(null, qry),
     avg = averageQuery(null, qry)
 )`,
 
-        uniqueKey: `// uniqueKey() arguments should end with "ID"
-block(
+        uniqueKey: `block(
+    // uniqueKey() arguments should end with "ID"
     recordKey = uniqueKey("xxColorRecord"),
     itemKey = uniqueKey("xxItemId")
 )`,
 
-        variableNaming: `// Variables should use lowerCamelCase
-block(
+        variableNaming: `block(
+    // Variables should use lowerCamelCase
     user_name = "John",
     Product_ID = 123,
     MY_CONSTANT = "test"
 )`,
 
-        nonOptimalNodeAccess: `// Hierarchy node references in expressions
-block(
+        nonOptimalNodeAccess: `block(
+    // Hierarchy node references in expressions
     value = ParentSeason.Name,
     color = ColorSpecification.Code,
     size = ProductSize.Value
 )`,
 
-        nullAccessProtection: `// Property access without null checks
-block(
+        nullAccessProtection: `block(
+    // Property access without null checks
     userName = user.name,
     itemCode = product.code,
     totalPrice = order.total
 )`,
 
-        mathOperationsParens: `// Complex math without parentheses
-block(
+        mathOperationsParens: `block(
+    // Complex math without parentheses
     result = a + b * c,
     value = x - y / z
 )`,
 
-        extraneousBlocks: `// Unnecessary block() for single statement
-block(
+        extraneousBlocks: `block(
+    // Unnecessary block() for single statement
     result = value
 )
 
