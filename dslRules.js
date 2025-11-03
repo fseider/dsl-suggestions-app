@@ -393,11 +393,12 @@ var DSL_RULES = [
             }
 
             var lineWithoutStrings = DSLRuleUtils.String.removeStringLiterals(line);
-            var varPattern = /\b(var|let|const)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)/g;
+            // Match both JavaScript declarations (var/let/const) and DSL assignments
+            var varPattern = /\b(?:(?:var|let|const)\s+)?([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=/g;
             var match;
 
             while ((match = varPattern.exec(lineWithoutStrings)) !== null) {
-                var varName = match[2];
+                var varName = match[1];
                 var position = match.index;
 
                 if (DSLRuleUtils.String.isInsideString(line, position)) {

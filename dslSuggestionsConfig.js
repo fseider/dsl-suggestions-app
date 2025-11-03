@@ -60,7 +60,7 @@ var dslSuggestionsConfigData = {
       description: "Query based functions impact performance. Should be set as One-Time / No-Copy",
       severity: "info",
       suggestionType: "advisory",
-      suggestion: "Ensure query based Attribute Expression is set as \"One-Time / No-Copy\" as per best practices.",
+      suggestion: "Ensure query based Attribute Expression **{function}()** is set as \"One-Time / No-Copy\" as per best practices.",
       functionNames: [
         "averageQuery",
         "countQuery",
@@ -77,7 +77,7 @@ var dslSuggestionsConfigData = {
       label: "UniqueKey",
       description: "uniqueKey() function argument naming convention - must end with 'ID'",
       suggestionType: "advisory",
-      suggestion: "uniqueKey field **{field}** should follow naming convention (must end with 'ID', e.g., xxRecordID, xxItemID).",
+      suggestion: "**uniqueKey()** field **{field}** should follow naming convention (must end with 'ID', e.g., xxRecordID, xxItemID).",
       function: "uniqueKey"
     },
 
