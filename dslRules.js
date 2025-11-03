@@ -371,9 +371,15 @@ var DSL_RULES = [
     {
         name: 'variableNaming',
         version: 'v2.00',
+        _instanceCounter: 0,
 
         check: function(line, lineNumber, allLines, context, config) {
             var suggestions = [];
+
+            // Reset counter at start of new analysis
+            if (lineNumber === 1) {
+                this._instanceCounter = 0;
+            }
 
             if (context && context.isInComment) {
                 return suggestions;
@@ -416,6 +422,9 @@ var DSL_RULES = [
                         correctedName: camelCaseName
                     });
 
+                    // Increment instance counter
+                    this._instanceCounter++;
+
                     // Check if this rule has different forms (Traditional vs Method)
                     var hasDifferentForms = ruleConfig.fixTemplates &&
                                            ruleConfig.fixTemplates.traditional !== ruleConfig.fixTemplates.method;
@@ -429,7 +438,8 @@ var DSL_RULES = [
                         label: ruleConfig.label || this.name,
                         fixable: true,  // Show as fixable for display purposes (shows both forms)
                         hasDifferentForms: hasDifferentForms,
-                        original: varName
+                        original: varName,
+                        instanceNumber: this._instanceCounter
                     });
                 }
             }
@@ -461,9 +471,15 @@ var DSL_RULES = [
     {
         name: 'nonOptimalNodeAccess',
         version: 'v2.00',
+        _instanceCounter: 0,
 
         check: function(line, lineNumber, allLines, context, config) {
             var suggestions = [];
+
+            // Reset counter at start of new analysis
+            if (lineNumber === 1) {
+                this._instanceCounter = 0;
+            }
 
             if (context && context.isInComment) {
                 return suggestions;
@@ -488,6 +504,9 @@ var DSL_RULES = [
                     node: node.name
                 });
 
+                // Increment instance counter
+                this._instanceCounter++;
+
                 suggestions.push({
                     line: lineNumber,
                     column: node.position,
@@ -496,7 +515,8 @@ var DSL_RULES = [
                     rule: this.name,
                     label: ruleConfig.label || this.name,
                     fixable: false,
-                    original: node.fullMatch
+                    original: node.fullMatch,
+                    instanceNumber: this._instanceCounter
                 });
             }
 
@@ -743,9 +763,15 @@ var DSL_RULES = [
     {
         name: 'mathOperationsParens',
         version: 'v2.00',
+        _instanceCounter: 0,
 
         check: function(line, lineNumber, allLines, context, config) {
             var suggestions = [];
+
+            // Reset counter at start of new analysis
+            if (lineNumber === 1) {
+                this._instanceCounter = 0;
+            }
 
             if (context && context.isInComment) {
                 return suggestions;
@@ -777,6 +803,9 @@ var DSL_RULES = [
                     var original = match[0];
                     var fixed = match[1] + ' ' + match[2] + ' (' + match[3] + ' ' + match[4] + ' ' + match[5] + ')';
 
+                    // Increment instance counter
+                    this._instanceCounter++;
+
                     suggestions.push({
                         line: lineNumber,
                         column: position,
@@ -785,7 +814,8 @@ var DSL_RULES = [
                         rule: this.name,
                         label: ruleConfig.label || this.name,
                         fixable: ruleConfig.autoFixEnabled || false,
-                        original: original
+                        original: original,
+                        instanceNumber: this._instanceCounter
                     });
                 }
             }
@@ -824,9 +854,15 @@ var DSL_RULES = [
     {
         name: 'extraneousBlocks',
         version: 'v2.00',
+        _instanceCounter: 0,
 
         check: function(line, lineNumber, allLines, context, config) {
             var suggestions = [];
+
+            // Reset counter at start of new analysis
+            if (lineNumber === 1) {
+                this._instanceCounter = 0;
+            }
 
             if (context && context.isInComment) {
                 return suggestions;
@@ -849,6 +885,9 @@ var DSL_RULES = [
                     var suggestionMsg = ruleConfig.suggestion ||
                         'Unnecessary block detected. Single statement does not require braces.';
 
+                    // Increment instance counter
+                    this._instanceCounter++;
+
                     // Check if this rule has different forms (Traditional vs Method)
                     var hasDifferentForms = ruleConfig.fixTemplates &&
                                            ruleConfig.fixTemplates.traditional !== ruleConfig.fixTemplates.method;
@@ -861,13 +900,17 @@ var DSL_RULES = [
                         rule: this.name,
                         label: ruleConfig.label || this.name,
                         fixable: true,  // Show as fixable for display purposes (shows both forms)
-                        hasDifferentForms: hasDifferentForms
+                        hasDifferentForms: hasDifferentForms,
+                        instanceNumber: this._instanceCounter
                     });
                 }
             }
 
             if (trimmedLine === '{}' || (trimmedLine === '{' && lineNumber < allLines.length && allLines[lineNumber].trim() === '}')) {
                 var suggestionMsg = ruleConfig.suggestion || 'Empty block detected. Consider removing or adding implementation.';
+
+                // Increment instance counter
+                this._instanceCounter++;
 
                 // Check if this rule has different forms (Traditional vs Method)
                 var hasDifferentForms = ruleConfig.fixTemplates &&
@@ -881,7 +924,8 @@ var DSL_RULES = [
                     rule: this.name,
                     label: ruleConfig.label || this.name,
                     fixable: true,  // Show as fixable for display purposes (shows both forms)
-                    hasDifferentForms: hasDifferentForms
+                    hasDifferentForms: hasDifferentForms,
+                    instanceNumber: this._instanceCounter
                 });
             }
 

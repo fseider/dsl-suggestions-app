@@ -1,7 +1,7 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.36
- * LAST UPDATED: 2025-10-31
+ * VERSION: v3.37
+ * LAST UPDATED: 2025-11-03
  *
  * ARTIFACT INFO (for proper Claude artifact creation):
  * - ID: dslSuggestionsApp.html
@@ -21,6 +21,18 @@
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
+ *
+ * v3.37 ENHANCEMENT - ADD COLOR CODING TO REMAINING RULES:
+ * - Added color coding support to Rules 4, 5, 7, 8 for consistency
+ * - Rule 4 (variableNaming): Added _instanceCounter, **{varName}** and **{correctedName}** markers
+ * - Rule 5 (nonOptimalNodeAccess): Added _instanceCounter, **{library}** marker
+ * - Rule 7 (mathOperationsParens): Added _instanceCounter
+ * - Rule 8 (extraneousBlocks): Added _instanceCounter
+ * - All 8 rules now have consistent color coding infrastructure
+ * - Multiple instances of same rule type now display in different colors (Red, Blue, Green, Orange, Purple, Pink)
+ * - Improved UX: easier to distinguish between multiple suggestions of same type
+ * - Updated dslRules.js and dslSuggestionsConfig.js
+ * - Cache-busting updated to v=3.37
  *
  * v3.36 UPDATE - SIMPLIFY QUERY FUNCTION MESSAGE:
  * - Changed message back to simpler singular form
@@ -457,8 +469,8 @@
     - Faster page load: 4 HTTP requests instead of 10+
     -->
 
-    <script src="dslSuggestionsEngine.js?v=3.36&t=1762147911" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
-    <script src="dslSuggestionsApp.js?v=3.36&t=1762147911"></script>
+    <script src="dslSuggestionsEngine.js?v=3.37&t=1762238400" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
+    <script src="dslSuggestionsApp.js?v=3.37&t=1762238400"></script>
 
     <style>
         /* v3.00 - Simplified styles, removed all popup-related CSS */

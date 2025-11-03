@@ -87,7 +87,7 @@ var dslSuggestionsConfigData = {
       description: "Enforce lowerCamelCase naming convention",
       severity: "info",
       suggestionType: "advisory",
-      suggestion: "Variable '{varName}' should use lowerCamelCase: '{correctedName}'.",
+      suggestion: "Variable **{varName}** should use lowerCamelCase: **{correctedName}**.",
       autoFixEnabled: false,
       fixTemplates: {
         traditional: "{correctedName}",
@@ -102,7 +102,7 @@ var dslSuggestionsConfigData = {
       description: "Hierarchy / Library node references that can impact continuous expression performance",
       severity: "info",
       suggestionType: "advisory",
-      suggestion: "{library} node reference detected. Consider use of a One-Time Attribute Expression to store the target value.",
+      suggestion: "**{library}** node reference detected. Consider use of a One-Time Attribute Expression to store the target value.",
       libraryNodes: [
         "ParentSeason.",
         "Collection.",
