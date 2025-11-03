@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.38
+ * VERSION: v3.39
  * LAST UPDATED: 2025-11-03
  *
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -21,6 +21,32 @@
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
+ *
+ * v3.39 ENHANCEMENT - NEW RULES REFERENCE POPUP:
+ * - "Show All Possible Suggestions" now displays in a professional popup modal
+ * - Each rule displayed as a card with:
+ *   - Rule title and enabled/disabled status badge
+ *   - Brief description of what the rule checks
+ *   - Suggestion message that will be shown
+ *   - Example code that triggers the rule
+ *   - "Copy Example" button for each rule
+ * - Popup features:
+ *   - Professional styling with dark code blocks
+ *   - Scrollable content for all 8 rules
+ *   - Close button and click-outside-to-close
+ *   - One-click copy to clipboard for testing examples
+ * - All 8 rules have real, working examples:
+ *   - divisionOperations: total / count
+ *   - queryFunctions: query(), sumQuery(), averageQuery()
+ *   - uniqueKey: uniqueKey("xxColorRecord")
+ *   - variableNaming: user_name, Product_ID
+ *   - nonOptimalNodeAccess: ParentSeason.Name
+ *   - nullAccessProtection: user.name without null check
+ *   - mathOperationsParens: a + b * c
+ *   - extraneousBlocks: unnecessary block() wrappers
+ * - Much better UX than previous plain text output
+ * - New functions: closeRulesPopup(), copyRuleExample()
+ * - Cache-busting updated to v=3.39
  *
  * v3.38 FIX - CORRECT RULE 3 TO MATCH ACTUAL DSL SYNTAX:
  * - Fixed Rule 3 to detect actual uniqueKey() function calls instead of invalid "UniqueKey: field" syntax
@@ -434,7 +460,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.36
+            Version: v3.39
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>
@@ -481,8 +507,8 @@
     - Faster page load: 4 HTTP requests instead of 10+
     -->
 
-    <script src="dslSuggestionsEngine.js?v=3.38&t=1762240000" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
-    <script src="dslSuggestionsApp.js?v=3.38&t=1762240000"></script>
+    <script src="dslSuggestionsEngine.js?v=3.39&t=1762242000" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
+    <script src="dslSuggestionsApp.js?v=3.39&t=1762242000"></script>
 
     <style>
         /* v3.00 - Simplified styles, removed all popup-related CSS */
@@ -557,6 +583,172 @@
             max-width: 100%;
         }
 
+        /* Rules Popup Styles */
+        .rules-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: auto;
+        }
+
+        .rules-popup-content {
+            background: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .rules-popup-header {
+            padding: 20px;
+            border-bottom: 2px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8f9fa;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .rules-popup-header h2 {
+            margin: 0;
+            color: #333;
+            font-size: 1.5em;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 2em;
+            color: #666;
+            cursor: pointer;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .close-button:hover {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+
+        .rules-popup-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .rule-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .rule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .rule-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .rule-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .rule-status.enabled {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .rule-status.disabled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .rule-description {
+            color: #555;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .rule-message {
+            background: #fff;
+            border-left: 4px solid #007bff;
+            padding: 10px;
+            margin-bottom: 12px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        .rule-example-section {
+            margin-top: 12px;
+        }
+
+        .rule-example-header {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .rule-example-code {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 12px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            white-space: pre;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .copy-example-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: background-color 0.2s;
+        }
+
+        .copy-example-btn:hover {
+            background: #0056b3;
+        }
+
+        .copy-example-btn:active {
+            background: #004085;
+        }
+
         /* Responsive design for smaller screens */
         @media (max-width: 768px) {
             textarea, .code-output {
@@ -568,5 +760,19 @@
             }
         }
     </style>
+
+    <!-- Rules Reference Popup -->
+    <div id="rulesPopup" class="rules-popup" style="display: none;">
+        <div class="rules-popup-content">
+            <div class="rules-popup-header">
+                <h2>DSL Suggestions - All Rules Reference</h2>
+                <button class="close-button" onclick="closeRulesPopup()">&times;</button>
+            </div>
+            <div class="rules-popup-body" id="rulesPopupBody">
+                <!-- Rules will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>

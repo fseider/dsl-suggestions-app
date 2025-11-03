@@ -10,7 +10,7 @@
  * 
  * ARCHITECTURAL BOUNDARY: Suggestions
  * AUTO-LOADED BY: dslSuggestionsApp.html
- * PROVIDES: getSuggestions(), showAllPossibleSuggestions(), debugExtraneousBlock(), clearSuggestionInput(), copyToClipboard(), dslSuggestionsAppVersion(), showVersionPopup(), closeVersionPopup(), updateSuggestionDisplay()
+ * PROVIDES: getSuggestions(), showAllPossibleSuggestions(), closeRulesPopup(), copyRuleExample(), debugExtraneousBlock(), clearSuggestionInput(), copyToClipboard(), dslSuggestionsAppVersion(), showVersionPopup(), closeVersionPopup(), updateSuggestionDisplay()
  * 
  * DESCRIPTION:
  * JavaScript logic for standalone DSL Suggestions application.
@@ -587,68 +587,145 @@ function demonstrateMathOperations() {
 
 // Show all possible suggestions from the config
 function showAllPossibleSuggestions() {
-    // v2.09 - Reset original suggestions when showing all
-    originalSuggestions = '';
-    
     if (typeof dslSuggestionsConfigData === 'undefined') {
-        // v2.07: Use helper function for div/textarea compatibility
-        setElementContent('suggestionOutput', 'DSL Suggestions Config not loaded.');
+        alert('DSL Suggestions Config not loaded.');
         return;
     }
-    
+
     var rules = dslSuggestionsConfigData.suggestionRules;
-    var output = 'DSL SUGGESTIONS REFERENCE - All Possible Suggestions:\n';
-    output += '================================================================\n\n';
-    
+
+    // Examples for each rule
+    var ruleExamples = {
+        divisionOperations: `// Division that could fail if denominator is zero
+total / count
+price / quantity`,
+
+        queryFunctions: `// Query functions impact performance
+result = query(null, qry)
+total = sumQuery(null, qry)
+avg = averageQuery(null, qry)`,
+
+        uniqueKey: `// uniqueKey() arguments should end with "ID"
+recordKey = uniqueKey("xxColorRecord")
+itemKey = uniqueKey("xxItemId")`,
+
+        variableNaming: `// Variables should use lowerCamelCase
+var user_name = "John"
+var Product_ID = 123
+var MY_CONSTANT = "test"`,
+
+        nonOptimalNodeAccess: `// Hierarchy node references in expressions
+value = ParentSeason.Name
+color = ColorSpecification.Code
+size = ProductSize.Value`,
+
+        nullAccessProtection: `// Property access without null checks
+userName = user.name
+itemCode = product.code
+totalPrice = order.total`,
+
+        mathOperationsParens: `// Complex math without parentheses
+result = a + b * c
+value = x - y / z`,
+
+        extraneousBlocks: `// Unnecessary block() for single statement
+block(
+    result = value
+)
+
+// Or empty blocks
+block()
+{}`
+    };
+
+    var popupBody = document.getElementById('rulesPopupBody');
+    popupBody.innerHTML = '';
+
     var ruleIndex = 1;
-    for (var ruleName in rules) {
-        if (rules.hasOwnProperty(ruleName)) {
-            var rule = rules[ruleName];
-            
-            output += ruleIndex + '. ' + ruleName.toUpperCase() + ' (' + (rule.suggestionType || 'unknown') + ')\n';
-            output += '   Description: ' + (rule.description || 'No description available') + '\n';
-            output += '   Suggestion: ' + (rule.suggestion || 'No suggestion message defined') + '\n';
-            output += '   Status: ' + (rule.enabled ? 'ENABLED' : 'DISABLED') + '\n';
-            
-            // Add pattern/function info if available
-            if (rule.pattern) {
-                output += '   Detects: Code matching pattern /' + rule.pattern + '/\n';
-            } else if (rule.patterns && rule.patterns.length > 0) {
-                output += '   Detects: ' + rule.patterns.join(', ') + '\n';
-            } else if (rule.functions && rule.functions.length > 0) {
-                output += '   Detects: Functions: ' + rule.functions.join(', ') + '\n';
-            }
-            
-            // Add auto-fix info if available
-            if (rule.autoFix) {
-                output += '   Auto-Fix: ' + (rule.autoFixEnabled !== false ? 'AVAILABLE' : 'DISABLED') + '\n';
-                if (rule.replacement) {
-                    output += '   Fix Template: ' + rule.replacement + '\n';
-                }
-            }
-            
-            output += '\n';
-            ruleIndex++;
-        }
+    var ruleOrder = ['divisionOperations', 'queryFunctions', 'uniqueKey', 'variableNaming',
+                     'nonOptimalNodeAccess', 'nullAccessProtection', 'mathOperationsParens', 'extraneousBlocks'];
+
+    for (var i = 0; i < ruleOrder.length; i++) {
+        var ruleName = ruleOrder[i];
+        if (!rules.hasOwnProperty(ruleName)) continue;
+
+        var rule = rules[ruleName];
+        var example = ruleExamples[ruleName] || '// No example available';
+
+        var ruleCard = document.createElement('div');
+        ruleCard.className = 'rule-card';
+
+        var statusClass = rule.enabled ? 'enabled' : 'disabled';
+        var statusText = rule.enabled ? 'ENABLED' : 'DISABLED';
+
+        // Remove **markers** from suggestion message for display
+        var displayMessage = (rule.suggestion || 'No suggestion message defined').replace(/\*\*/g, '');
+
+        ruleCard.innerHTML = `
+            <div class="rule-header">
+                <div class="rule-title">${ruleIndex}. ${rule.label || ruleName}</div>
+                <div class="rule-status ${statusClass}">${statusText}</div>
+            </div>
+            <div class="rule-description">${rule.description || 'No description available'}</div>
+            <div class="rule-message"><strong>Suggestion:</strong> ${displayMessage}</div>
+            <div class="rule-example-section">
+                <div class="rule-example-header">
+                    <span>Example Code:</span>
+                    <button class="copy-example-btn" onclick="copyRuleExample('${ruleName}')">Copy Example</button>
+                </div>
+                <div class="rule-example-code" id="example-${ruleName}">${example}</div>
+            </div>
+        `;
+
+        popupBody.appendChild(ruleCard);
+        ruleIndex++;
     }
-    
-    output += '================================================================\n';
-    output += 'Total Rules: ' + (ruleIndex - 1) + '\n';
-    output += 'Config Version: ' + dslSuggestionsConfigData.version + '\n';
-    output += 'Last Updated: ' + dslSuggestionsConfigData.lastUpdated + '\n\n';
-    
-    output += 'USAGE:\n';
-    output += '- Enter DSL code in the input area above\n';
-    output += '- Click "Get Suggestions" to analyze your code\n';
-    output += '- Review suggestions for optimization opportunities\n';
-    output += '- Check "Suggestions Applied" for auto-fixed code\n';
-    
-    // v2.07: Use helper function for div/textarea compatibility
-    setElementContent('suggestionOutput', output);
-    setElementContent('suggestionsApplied', '');
-    
-    // v2.09 - Store as original
-    originalSuggestions = output;
+
+    // Show the popup
+    document.getElementById('rulesPopup').style.display = 'flex';
+
+    // Store examples for copying
+    window.ruleExamplesData = ruleExamples;
+}
+
+function closeRulesPopup() {
+    document.getElementById('rulesPopup').style.display = 'none';
+}
+
+function copyRuleExample(ruleName) {
+    if (!window.ruleExamplesData || !window.ruleExamplesData[ruleName]) {
+        alert('Example not found');
+        return;
+    }
+
+    var exampleText = window.ruleExamplesData[ruleName];
+
+    // Create temporary textarea to copy text
+    var tempTextarea = document.createElement('textarea');
+    tempTextarea.value = exampleText;
+    tempTextarea.style.position = 'fixed';
+    tempTextarea.style.opacity = '0';
+    document.body.appendChild(tempTextarea);
+    tempTextarea.select();
+
+    try {
+        document.execCommand('copy');
+
+        // Visual feedback
+        var btn = event.target;
+        var originalText = btn.textContent;
+        btn.textContent = 'Copied!';
+        btn.style.background = '#28a745';
+
+        setTimeout(function() {
+            btn.textContent = originalText;
+            btn.style.background = '#007bff';
+        }, 1500);
+    } catch (err) {
+        alert('Failed to copy example');
+    }
+
+    document.body.removeChild(tempTextarea);
 }
 
 // Clear the suggestion input and outputs
@@ -787,6 +864,8 @@ if (typeof window !== 'undefined') {
     window.clearSuggestionInput = clearSuggestionInput;
     window.copyToClipboard = copyToClipboard;
     window.showAllPossibleSuggestions = showAllPossibleSuggestions;
+    window.closeRulesPopup = closeRulesPopup;  // v3.39 - Close rules popup
+    window.copyRuleExample = copyRuleExample;  // v3.39 - Copy rule example
     window.dslSuggestionsAppVersion = dslSuggestionsAppVersion;
     window.debugExtraneousBlock = debugExtraneousBlock;
     window.handleScriptError = handleScriptError;
