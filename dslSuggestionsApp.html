@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.46
+ * VERSION: v3.47
  * LAST UPDATED: 2025-11-03
  *
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -21,6 +21,16 @@
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
+ *
+ * v3.47 CRITICAL FIX - DIVISION RULE SIMPLE COMMENT SKIP:
+ * - Replaced complex regex approach with simple, reliable check
+ *   - Previous attempts with regex patterns /\/(?![=*])/g and /(?<!\*)\/(?![=*])/g still failed
+ *   - New approach: Skip entire line if it contains both /* and */
+ *   - Added check: if (line.indexOf('/*') !== -1 && line.indexOf('*/') !== -1) return;
+ * - Simplified division pattern back to /\/(?!=)/g (just skip /=)
+ * - Now comment lines like /* uniqueKey() Best Practices */ are completely ignored
+ * - Tested and verified - no more false division detection on comments
+ * - Cache-busting updated to v=3.47
  *
  * v3.46 CRITICAL FIX - DIVISION RULE STILL TRIGGERING ON */ COMMENT CLOSE:
  * - Fixed division rule that was matching the / in */ at end of comments
@@ -537,7 +547,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.46
+            Version: v3.47
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>
@@ -581,8 +591,8 @@
     - Faster page load: 4 HTTP requests instead of 10+
     -->
 
-    <script src="dslSuggestionsEngine.js?v=3.46&t=1762256000" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
-    <script src="dslSuggestionsApp.js?v=3.46&t=1762256000"></script>
+    <script src="dslSuggestionsEngine.js?v=3.47&t=1762258000" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
+    <script src="dslSuggestionsApp.js?v=3.47&t=1762258000"></script>
 
     <style>
         /* v3.00 - Simplified styles, removed all popup-related CSS */

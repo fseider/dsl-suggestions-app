@@ -49,10 +49,15 @@ var DSL_RULES = [
                 return suggestions;
             }
 
+            // Skip lines that contain block comments /* */
+            if (line.indexOf('/*') !== -1 && line.indexOf('*/') !== -1) {
+                return suggestions;
+            }
+
             var lineWithoutStrings = DSLRuleUtils.String.removeStringLiterals(line);
 
-            // Find all division operators (skip /=, /* and */ comments)
-            var divisionPattern = /(?<!\*)\/(?![=*])/g;  // Match / but not /=, /*, or */
+            // Find all division operators (skip /=)
+            var divisionPattern = /\/(?!=)/g;  // Match / but not /=
             var match;
             var processedExpressions = {};  // Track already processed expressions
 
