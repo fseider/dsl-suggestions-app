@@ -878,6 +878,15 @@ var DSL_RULES = [
             var lineWithoutStrings = DSLRuleUtils.String.removeStringLiterals(line);
             var trimmedLine = lineWithoutStrings.trim();
 
+            // Check for unnecessary block() wrapper with single statement
+            if (trimmedLine.indexOf('block(') !== -1) {
+                var blockResult = this._checkBlockFunction(lineNumber, allLines, ruleConfig);
+                if (blockResult) {
+                    suggestions.push(blockResult);
+                }
+            }
+
+            // Check for unnecessary curly braces with single statement
             if (trimmedLine === '{' && lineNumber < allLines.length - 1) {
                 var nextLine = allLines[lineNumber].trim();
                 var lineAfterNext = lineNumber < allLines.length - 2 ? allLines[lineNumber + 1].trim() : '';
@@ -907,6 +916,7 @@ var DSL_RULES = [
                 }
             }
 
+            // Check for empty blocks
             if (trimmedLine === '{}' || (trimmedLine === '{' && lineNumber < allLines.length && allLines[lineNumber].trim() === '}')) {
                 var suggestionMsg = ruleConfig.suggestion || 'Empty block detected. Consider removing or adding implementation.';
 
@@ -931,6 +941,117 @@ var DSL_RULES = [
             }
 
             return suggestions;
+        },
+
+        _checkBlockFunction: function(startLine, allLines, ruleConfig) {
+            // Extract the entire block() content across multiple lines
+            var blockContent = '';
+            var currentLine = startLine - 1; // Convert to 0-indexed
+            var parenDepth = 0;
+            var foundBlock = false;
+            var blockStartCol = -1;
+
+            // Find and extract the complete block() expression
+            for (var i = currentLine; i < allLines.length; i++) {
+                var line = allLines[i];
+                var lineWithoutStrings = DSLRuleUtils.String.removeStringLiterals(line);
+
+                for (var j = 0; j < lineWithoutStrings.length; j++) {
+                    var char = lineWithoutStrings[j];
+
+                    // Check if we're at the start of block(
+                    if (!foundBlock && lineWithoutStrings.substr(j, 6) === 'block(') {
+                        foundBlock = true;
+                        blockStartCol = j;
+                        parenDepth = 1;
+                        j += 5; // Skip past "block"
+                        continue;
+                    }
+
+                    if (foundBlock) {
+                        if (char === '(') {
+                            parenDepth++;
+                        } else if (char === ')') {
+                            parenDepth--;
+                            if (parenDepth === 0) {
+                                // Found the end of block()
+                                // Now analyze what's inside
+                                var statementCount = this._countStatements(blockContent);
+
+                                if (statementCount === 1) {
+                                    // Unnecessary block() wrapper
+                                    this._instanceCounter++;
+
+                                    var suggestionMsg = ruleConfig.suggestion ||
+                                        'Remove unnecessary block() wrapper for single statement.';
+
+                                    var hasDifferentForms = ruleConfig.fixTemplates &&
+                                                           ruleConfig.fixTemplates.traditional !== ruleConfig.fixTemplates.method;
+
+                                    return {
+                                        line: startLine,
+                                        column: blockStartCol,
+                                        message: suggestionMsg,
+                                        severity: ruleConfig.severity || 'info',
+                                        rule: this.name,
+                                        label: ruleConfig.label || this.name,
+                                        fixable: true,
+                                        hasDifferentForms: hasDifferentForms,
+                                        instanceNumber: this._instanceCounter
+                                    };
+                                }
+
+                                return null;
+                            }
+                        }
+
+                        // Accumulate content inside block()
+                        blockContent += char;
+                    }
+                }
+
+                if (foundBlock && parenDepth > 0) {
+                    blockContent += '\n';
+                }
+
+                if (foundBlock && parenDepth === 0) {
+                    break;
+                }
+            }
+
+            return null;
+        },
+
+        _countStatements: function(content) {
+            // Remove comments
+            var contentNoComments = content.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*/g, '');
+
+            // Trim whitespace
+            var trimmed = contentNoComments.trim();
+
+            // Empty block
+            if (trimmed === '') {
+                return 0;
+            }
+
+            // Count commas at depth 0 (not inside nested parentheses/brackets)
+            var depth = 0;
+            var commaCount = 0;
+
+            for (var i = 0; i < trimmed.length; i++) {
+                var char = trimmed[i];
+
+                if (char === '(' || char === '[' || char === '{') {
+                    depth++;
+                } else if (char === ')' || char === ']' || char === '}') {
+                    depth--;
+                } else if (char === ',' && depth === 0) {
+                    commaCount++;
+                }
+            }
+
+            // Number of statements = comma count + 1 (if there's any content)
+            return trimmed.length > 0 ? commaCount + 1 : 0;
         },
 
         fix: function(code, suggestion, config) {
