@@ -92,7 +92,7 @@ var dslExamples = {
     extraneousBlocks:
 `block(
     /* Unnecessary block() for single statement */
-    result = value
+    result = value2
 )`
 };
 
