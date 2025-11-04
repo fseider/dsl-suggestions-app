@@ -581,6 +581,97 @@ function copyRuleExample(ruleName) {
     document.body.removeChild(tempTextarea);
 }
 
+// Load comprehensive example that demonstrates all 8 rules
+function loadComprehensiveExample() {
+    var comprehensiveExample = `/* ========================================
+ * COMPREHENSIVE DSL EXAMPLE
+ * Demonstrates all 8 suggestion rules
+ * ======================================== */
+
+/* Rule 1: Division Operations - Detect division that needs zero protection */
+block(
+    result1 = total / count,
+    result2 = price / quantity,
+    ratio = revenue / days
+)
+
+/* Rule 2: Query Functions - Detect query-based functions (performance impact) */
+block(
+    customerData = query(null, customerQuery),
+    totalSales = sumQuery(null, salesQuery),
+    avgPrice = averageQuery(null, priceQuery),
+    itemCount = countQuery(null, itemQuery),
+    maxValue = maxQuery(null, valueQuery),
+    minValue = minQuery(null, valueQuery)
+)
+
+/* Rule 3: uniqueKey() - Best practice reminder for One-Time / No-Copy */
+block(
+    recordKey = uniqueKey("xxColorRecord"),
+    itemKey = uniqueKey("xxItemId"),
+    productKey = uniqueKey("xxProductRecord")
+)
+
+/* Rule 4: Variable Naming - Enforce lowerCamelCase convention */
+block(
+    user_name = "John Doe",
+    Product_ID = 12345,
+    MY_CONSTANT = "test value",
+    customer_email = "test@example.com"
+)
+
+/* Rule 5: Non-Optimal Node Access - Hierarchy/Library node references */
+block(
+    seasonName = ParentSeason.Name,
+    colorCode = ColorSpecification.Code,
+    sizeValue = ProductSize.Value,
+    categoryName = Category1.Name,
+    themeName = Theme.Description
+)
+
+/* Rule 6: Null Access Protection - Property access without null checks */
+block(
+    userName = user.name,
+    itemCode = product.code,
+    totalPrice = order.total,
+    customerCity = customer.address.city,
+    productCategory = item.category.name
+)
+
+/* Rule 7: Math Operations Parens - Complex math without parentheses for clarity */
+block(
+    complexCalc1 = a + b * c,
+    complexCalc2 = x - y / z,
+    mixedOps = price + discount * quantity,
+    result = value1 + value2 * value3 - value4
+)
+
+/* Rule 8: Extraneous Blocks - Unnecessary block() wrapper for single statement */
+block(
+    singleStatement = simpleValue
+)
+
+block()
+
+{}
+
+/* End of comprehensive example */`;
+
+    // Set the example in the input
+    document.getElementById('suggestionInput').value = comprehensiveExample;
+
+    // Visual feedback
+    var inputElement = document.getElementById('suggestionInput');
+    var originalBg = inputElement.style.backgroundColor;
+    inputElement.style.backgroundColor = '#e8f5e8';
+
+    setTimeout(function() {
+        inputElement.style.backgroundColor = originalBg;
+        // Auto-run suggestions
+        getSuggestions();
+    }, 300);
+}
+
 // Clear the suggestion input and outputs
 function clearSuggestionInput() {
     document.getElementById('suggestionInput').value = '';
@@ -718,6 +809,9 @@ if (typeof window !== 'undefined') {
     window.demonstrateContinuousExpressions = demonstrateContinuousExpressions;
     window.demonstrateNullProtection = demonstrateNullProtection;
     window.demonstrateMathOperations = demonstrateMathOperations;
-    
+
+    // Comprehensive example
+    window.loadComprehensiveExample = loadComprehensiveExample;
+
     console.log('[App v2.12] Functions exposed to global scope - persistent form selection enabled');
 }
