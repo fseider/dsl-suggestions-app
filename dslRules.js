@@ -863,6 +863,7 @@ var DSL_RULES = [
             // Reset counter at start of new analysis
             if (lineNumber === 1) {
                 this._instanceCounter = 0;
+                this._checkedBlocks = {}; // Track which blocks we've already checked
             }
 
             if (context && context.isInComment) {
@@ -879,10 +880,17 @@ var DSL_RULES = [
             var trimmedLine = lineWithoutStrings.trim();
 
             // Check for unnecessary block() wrapper with single statement
-            if (trimmedLine.indexOf('block(') !== -1) {
-                var blockResult = this._checkBlockFunction(lineNumber, allLines, ruleConfig);
-                if (blockResult) {
-                    suggestions.push(blockResult);
+            // Only check if this line starts with 'block(' to avoid duplicate checks
+            if (trimmedLine.indexOf('block(') === 0) {
+                // Mark this line as checked to avoid duplicate processing
+                var blockKey = 'line_' + lineNumber;
+                if (!this._checkedBlocks[blockKey]) {
+                    this._checkedBlocks[blockKey] = true;
+
+                    var blockResult = this._checkBlockFunction(lineNumber, allLines, ruleConfig);
+                    if (blockResult) {
+                        suggestions.push(blockResult);
+                    }
                 }
             }
 
