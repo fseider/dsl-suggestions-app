@@ -627,10 +627,7 @@ function copyAllExamples() {
         extraneousBlocks: `block(
     /* Unnecessary block() for single statement */
     result = value
-)
-
-block()
-{}`
+)`
     };
 
     // Aggregate all examples in order
