@@ -542,10 +542,10 @@ function copyAllExamples() {
 
     // Start with outer block and header
     var allExamples = 'block(\n';
-    allExamples += '/* ========================================\n';
-    allExamples += ' * ALL RULE EXAMPLES - AGGREGATED\n';
-    allExamples += ' * Each rule example in separate block()\n';
-    allExamples += ' * ======================================== */\n\n';
+    allExamples += '    /* ========================================\n';
+    allExamples += '     * ALL RULE EXAMPLES - AGGREGATED\n';
+    allExamples += '     * Each rule example in separate block()\n';
+    allExamples += '     * ======================================== */\n';
 
     // Add each rule example with proper indentation
     for (var i = 0; i < ruleOrder.length; i++) {
@@ -557,12 +557,21 @@ function copyAllExamples() {
             continue;
         }
 
-        // Add the example (already has proper block structure)
-        allExamples += example;
+        // Add blank line before each example
+        allExamples += '\n';
 
-        // Add spacing between rules
+        // Indent each line of the example by 4 spaces
+        var lines = example.split('\n');
+        for (var j = 0; j < lines.length; j++) {
+            allExamples += '    ' + lines[j];
+            if (j < lines.length - 1) {
+                allExamples += '\n';
+            }
+        }
+
+        // Add blank line after each example (except the last one)
         if (i < ruleOrder.length - 1) {
-            allExamples += '\n\n';
+            allExamples += '\n';
         }
     }
 
@@ -586,7 +595,7 @@ function copyAllExamples() {
             if (buttons[i].textContent.includes('Copy All Examples')) {
                 var btn = buttons[i];
                 var originalText = btn.innerHTML;
-                btn.innerHTML = '✅ Copied! Close and paste into input area';
+                btn.innerHTML = '✅ Copied!';
                 btn.style.background = '#218838';
 
                 setTimeout(function() {
@@ -596,6 +605,9 @@ function copyAllExamples() {
                 break;
             }
         }
+
+        // Close the popup after copying
+        closeRulesPopup();
     } catch (err) {
         alert('Failed to copy examples');
     }
