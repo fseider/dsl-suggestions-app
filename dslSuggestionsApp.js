@@ -433,63 +433,8 @@ function showAllPossibleSuggestions() {
 
     var rules = dslSuggestionsConfigData.suggestionRules;
 
-    // Examples for each rule
-    // CRITICAL: All multi-statement expressions MUST be wrapped in block()
-    var ruleExamples = {
-        divisionOperations: `block(
-    /* Division that could fail if denominator is zero */
-    result1 = total / count,
-    result2 = price / quantity
-)`,
-
-        queryFunctions: `block(
-    /* Query functions impact performance */
-    result = query(null, qry),
-    total = sumQuery(null, qry),
-    avg = averageQuery(null, qry)
-)`,
-
-        uniqueKey: `block(
-    /* uniqueKey() Best Practices */
-    recordKey = uniqueKey("xxColorRecord"),
-    itemKey = uniqueKey("xxItemId")
-)`,
-
-        variableNaming: `block(
-    /* Variables should use lowerCamelCase */
-    user_name = "John",
-    Product_ID = 123,
-    MY_CONSTANT = "test"
-)`,
-
-        nonOptimalNodeAccess: `block(
-    /* Hierarchy / Library Item node references in expressions */
-    value = ParentSeason.Name,
-    color = ColorSpecification.Code,
-    size = ProductSize.Value
-)`,
-
-        nullAccessProtection: `block(
-    /* Property access without null checks */
-    userName = user.name,
-    itemCode = product.code,
-    totalPrice = order.total
-)`,
-
-        mathOperationsParens: `block(
-    /* Complex math without parentheses */
-    result = a + b * c,
-    value = x - y / z
-)`,
-
-        extraneousBlocks: `block(
-    /* Unnecessary block() for single statement */
-    result = value
-)
-
-block()
-{}`
-    };
+    // Use examples from dslExamples.js (loaded separately for easy editing)
+    var ruleExamples = window.dslExamples || {};
 
     var popupBody = document.getElementById('rulesPopupBody');
     popupBody.innerHTML = '';
@@ -537,8 +482,8 @@ block()
     // Show the popup
     document.getElementById('rulesPopup').style.display = 'flex';
 
-    // Store examples for copying
-    window.ruleExamplesData = ruleExamples;
+    // Store examples for copying (use dslExamples directly)
+    window.ruleExamplesData = window.dslExamples || ruleExamples;
 }
 
 function closeRulesPopup() {
@@ -583,52 +528,13 @@ function copyRuleExample(ruleName) {
 
 // Copy all rule examples aggregated together
 function copyAllExamples() {
-    // Get the individual examples exactly as shown in the popup
-    var ruleExamples = {
-        divisionOperations: `block(
-    /* Division that could fail if denominator is zero */
-    result1 = total / count,
-    result2 = price / quantity
-)`,
-        queryFunctions: `block(
-    /* Query functions impact performance */
-    result = query(null, qry),
-    total = sumQuery(null, qry),
-    avg = averageQuery(null, qry)
-)`,
-        uniqueKey: `block(
-    /* uniqueKey() Best Practices */
-    recordKey = uniqueKey("xxColorRecord"),
-    itemKey = uniqueKey("xxItemId")
-)`,
-        variableNaming: `block(
-    /* Variables should use lowerCamelCase */
-    user_name = "John",
-    Product_ID = 123,
-    MY_CONSTANT = "test"
-)`,
-        nonOptimalNodeAccess: `block(
-    /* Hierarchy / Library Item node references in expressions */
-    value = ParentSeason.Name,
-    color = ColorSpecification.Code,
-    size = ProductSize.Value
-)`,
-        nullAccessProtection: `block(
-    /* Property access without null checks */
-    userName = user.name,
-    itemCode = product.code,
-    totalPrice = order.total
-)`,
-        mathOperationsParens: `block(
-    /* Complex math without parentheses */
-    result = a + b * c,
-    value = x - y / z
-)`,
-        extraneousBlocks: `block(
-    /* Unnecessary block() for single statement */
-    result = value
-)`
-    };
+    // Get examples from dslExamples.js (loaded separately for easy editing)
+    if (typeof window.dslExamples === 'undefined') {
+        alert('Examples not loaded. Please refresh the page.');
+        return;
+    }
+
+    var ruleExamples = window.dslExamples;
 
     // Aggregate all examples in order
     var ruleOrder = ['divisionOperations', 'queryFunctions', 'uniqueKey', 'variableNaming',
@@ -645,6 +551,11 @@ function copyAllExamples() {
     for (var i = 0; i < ruleOrder.length; i++) {
         var ruleName = ruleOrder[i];
         var example = ruleExamples[ruleName];
+
+        if (!example) {
+            console.warn('Example not found for rule:', ruleName);
+            continue;
+        }
 
         // Add the example (already has proper block structure)
         allExamples += example;
