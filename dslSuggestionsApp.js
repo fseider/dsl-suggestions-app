@@ -637,17 +637,19 @@ block()
     var ruleOrder = ['divisionOperations', 'queryFunctions', 'uniqueKey', 'variableNaming',
                      'nonOptimalNodeAccess', 'nullAccessProtection', 'mathOperationsParens', 'extraneousBlocks'];
 
-    var allExamples = '/* ========================================\n';
+    // Start with outer block and header
+    var allExamples = 'block(\n';
+    allExamples += '/* ========================================\n';
     allExamples += ' * ALL RULE EXAMPLES - AGGREGATED\n';
     allExamples += ' * Each rule example in separate block()\n';
     allExamples += ' * ======================================== */\n\n';
 
+    // Add each rule example with proper indentation
     for (var i = 0; i < ruleOrder.length; i++) {
         var ruleName = ruleOrder[i];
         var example = ruleExamples[ruleName];
 
-        // Add rule number and name as comment
-        allExamples += '/* Rule ' + (i + 1) + ': ' + ruleName + ' */\n';
+        // Add the example (already has proper block structure)
         allExamples += example;
 
         // Add spacing between rules
@@ -655,6 +657,9 @@ block()
             allExamples += '\n\n';
         }
     }
+
+    // Close outer block
+    allExamples += '\n)';
 
     // Copy to clipboard
     var tempTextarea = document.createElement('textarea');
