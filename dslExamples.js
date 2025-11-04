@@ -36,53 +36,61 @@
  */
 
 var dslExamples = {
-    divisionOperations: `block(
+    divisionOperations:
+`block(
     /* Division that could fail if denominator is zero */
     result1 = total / count,
     result2 = price / quantity
 )`,
 
-    queryFunctions: `block(
+    queryFunctions:
+`block(
     /* Query functions impact performance */
     result = query(null, qry),
     total = sumQuery(null, qry),
     avg = averageQuery(null, qry)
 )`,
 
-    uniqueKey: `block(
+    uniqueKey:
+`block(
     /* uniqueKey() Best Practices */
     recordKey = uniqueKey("xxColorRecord"),
     itemKey = uniqueKey("xxItemId")
 )`,
 
-    variableNaming: `block(
+    variableNaming:
+`block(
     /* Variables should use lowerCamelCase */
     user_name = "John",
     Product_ID = 123,
     MY_CONSTANT = "test"
 )`,
 
-    nonOptimalNodeAccess: `block(
+    nonOptimalNodeAccess:
+`block(
     /* Hierarchy / Library Item node references in expressions */
     value = ParentSeason.Name,
     color = ColorSpecification.Code,
     size = ProductSize.Value
 )`,
 
-    nullAccessProtection: `block(
+    nullAccessProtection:
+`block(
     /* Property access without null checks */
     userName = user.name,
     itemCode = product.code,
     totalPrice = order.total
 )`,
 
-    mathOperationsParens: `block(
+    mathOperationsParens:
+`block(
     /* Complex math without parentheses */
     result = a + b * c,
     value = x - y / z
 )`,
 
-    extraneousBlocks: `block(
+    extraneousBlocks:
+`block(
     /* Unnecessary block() for single statement */
     result = value
 )`
