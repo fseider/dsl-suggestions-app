@@ -1,7 +1,7 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.50
- * LAST UPDATED: 2025-11-03
+ * VERSION: v3.51
+ * LAST UPDATED: 2025-11-04
  *
  * ARTIFACT INFO (for proper Claude artifact creation):
  * - ID: dslSuggestionsApp.html
@@ -21,6 +21,21 @@
  * - Any change to ANY file bumps this version
  * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
  * - All other files reference this master version
+ *
+ * v3.51 UPDATE - EXTRANEOUS BLOCKS FIX AND EXAMPLES REFACTORING:
+ * - Fixed extraneousBlocks rule (dslRules.js v1.02) to detect unnecessary block() wrappers
+ *   - Rule was only detecting curly braces {}, not block() function wrappers
+ *   - Added _checkBlockFunction() to parse multi-line block() expressions
+ *   - Added _countStatements() to count comma-separated statements (ignores comments)
+ *   - Now properly detects: block(/* comment */ result = value)
+ * - Extracted examples to separate dslExamples.js file (v1.01)
+ *   - Moved hardcoded examples from dslSuggestionsApp.js to standalone file
+ *   - Added editing guidelines header for user maintainability
+ *   - Reformatted examples with backticks on new lines for readability
+ * - Added "Copy All Examples" button to rules popup (dslSuggestionsApp.js v2.11)
+ *   - Button aggregates all 8 rule examples with outer block() wrapper
+ *   - Each example wrapped in its own block() for clarity
+ * - Cache-busting updated to v=3.51
  *
  * v3.50 FIX - MATH OPERATIONS COLOR HIGHLIGHTING IMPLEMENTATION:
  * - Fixed how **markers** are applied for math expression highlighting
@@ -578,7 +593,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.50
+            Version: v3.51
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>
@@ -623,9 +638,9 @@
     - Examples loaded from separate dslExamples.js for easy editing
     -->
 
-    <script src="dslSuggestionsEngine.js?v=3.50&t=1762264000" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
-    <script src="dslExamples.js?v=3.50&t=1762264000" onerror="handleScriptError('dslExamples.js')"></script>
-    <script src="dslSuggestionsApp.js?v=3.50&t=1762264000"></script>
+    <script src="dslSuggestionsEngine.js?v=3.51&t=1762264000" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
+    <script src="dslExamples.js?v=3.51&t=1762264000" onerror="handleScriptError('dslExamples.js')"></script>
+    <script src="dslSuggestionsApp.js?v=3.51&t=1762264000"></script>
 
     <style>
         /* v3.00 - Simplified styles, removed all popup-related CSS */

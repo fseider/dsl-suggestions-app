@@ -1,7 +1,7 @@
 /*
  * FILE: dslSuggestionsApp.js
- * VERSION: v2.10
- * LAST UPDATED: 2025-01-09
+ * VERSION: v2.11
+ * LAST UPDATED: 2025-11-04
  * 
  * ARTIFACT INFO (for proper Claude artifact creation):
  * - ID: dslSuggestionsApp.js

@@ -1,7 +1,7 @@
 /*
  * FILE: dslRules.js
- * VERSION: v1.01
- * LAST UPDATED: 2025-10-29
+ * VERSION: v1.02
+ * LAST UPDATED: 2025-11-04
  *
  * ARTIFACT INFO (for proper Claude artifact creation):
  * - ID: dslRules.js
