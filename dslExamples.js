@@ -1,6 +1,6 @@
 /*
  * FILE: dslExamples.js
- * VERSION: v1.00
+ * VERSION: v1.01
  * LAST UPDATED: 2025-11-04
  *
  * ARCHITECTURAL BOUNDARY: Suggestions
@@ -13,11 +13,26 @@
  * - Individual rule cards in "Show All Possible Suggestions" popup
  * - Aggregated output from "Copy All Examples" button
  *
- * STRUCTURE:
- * Each example should be a valid DSL block() expression.
- * All multi-statement expressions MUST be wrapped in block().
+ * ⚠️ EDITING GUIDELINES:
  *
- * CRITICAL: All multi-statement expressions MUST be wrapped in block()
+ * ✅ EDITABLE (the DSL code inside backticks):
+ *    - Change DSL code, comments, variable names
+ *    - Add or remove lines
+ *    - Modify structure and content
+ *
+ * ❌ DO NOT EDIT (the key names):
+ *    - divisionOperations, queryFunctions, uniqueKey, etc.
+ *    - These MUST match rule names in dslSuggestionsConfig.js
+ *    - Changing them will break example lookup
+ *
+ * EXAMPLE:
+ *     queryFunctions: `block(         ← DO NOT EDIT this key name
+ *         result = query(null, qry)   ← EDIT this DSL code freely
+ *     )`
+ *
+ * STRUCTURE:
+ * - Each example should be a valid DSL block() expression
+ * - All multi-statement expressions MUST be wrapped in block()
  */
 
 var dslExamples = {
