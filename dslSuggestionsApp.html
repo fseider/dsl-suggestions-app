@@ -587,7 +587,6 @@
         <div class="button-group">
             <button onclick="getSuggestions()">Get Suggestions</button>
             <button onclick="showAllPossibleSuggestions()">Show All Possible Suggestions</button>
-            <button onclick="loadComprehensiveExample()">Load Complete Example (All Rules)</button>
             <button onclick="clearSuggestionInput()">Clear Input</button>
         </div>
 
@@ -886,6 +885,12 @@
             </div>
             <div class="rules-popup-body" id="rulesPopupBody">
                 <!-- Rules will be dynamically inserted here -->
+            </div>
+            <div style="padding: 20px; border-top: 2px solid #e0e0e0; background: #f8f9fa; text-align: center;">
+                <button onclick="copyAllExamples()" style="padding: 12px 24px; font-size: 1.1em; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                    📋 Copy All Examples
+                </button>
+                <p style="margin-top: 10px; color: #666; font-size: 0.9em;">Copy all 8 rule examples to test the complete app functionality</p>
             </div>
         </div>
     </div>

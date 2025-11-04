@@ -581,95 +581,113 @@ function copyRuleExample(ruleName) {
     document.body.removeChild(tempTextarea);
 }
 
-// Load comprehensive example that demonstrates all 8 rules
-function loadComprehensiveExample() {
-    var comprehensiveExample = `/* ========================================
- * COMPREHENSIVE DSL EXAMPLE
- * Demonstrates all 8 suggestion rules
- * ======================================== */
-
-/* Rule 1: Division Operations - Detect division that needs zero protection */
-block(
+// Copy all rule examples aggregated together
+function copyAllExamples() {
+    // Get the individual examples exactly as shown in the popup
+    var ruleExamples = {
+        divisionOperations: `block(
+    /* Division that could fail if denominator is zero */
     result1 = total / count,
-    result2 = price / quantity,
-    ratio = revenue / days
-)
-
-/* Rule 2: Query Functions - Detect query-based functions (performance impact) */
-block(
-    customerData = query(null, customerQuery),
-    totalSales = sumQuery(null, salesQuery),
-    avgPrice = averageQuery(null, priceQuery),
-    itemCount = countQuery(null, itemQuery),
-    maxValue = maxQuery(null, valueQuery),
-    minValue = minQuery(null, valueQuery)
-)
-
-/* Rule 3: uniqueKey() - Best practice reminder for One-Time / No-Copy */
-block(
+    result2 = price / quantity
+)`,
+        queryFunctions: `block(
+    /* Query functions impact performance */
+    result = query(null, qry),
+    total = sumQuery(null, qry),
+    avg = averageQuery(null, qry)
+)`,
+        uniqueKey: `block(
+    /* uniqueKey() Best Practices */
     recordKey = uniqueKey("xxColorRecord"),
-    itemKey = uniqueKey("xxItemId"),
-    productKey = uniqueKey("xxProductRecord")
-)
-
-/* Rule 4: Variable Naming - Enforce lowerCamelCase convention */
-block(
-    user_name = "John Doe",
-    Product_ID = 12345,
-    MY_CONSTANT = "test value",
-    customer_email = "test@example.com"
-)
-
-/* Rule 5: Non-Optimal Node Access - Hierarchy/Library node references */
-block(
-    seasonName = ParentSeason.Name,
-    colorCode = ColorSpecification.Code,
-    sizeValue = ProductSize.Value,
-    categoryName = Category1.Name,
-    themeName = Theme.Description
-)
-
-/* Rule 6: Null Access Protection - Property access without null checks */
-block(
+    itemKey = uniqueKey("xxItemId")
+)`,
+        variableNaming: `block(
+    /* Variables should use lowerCamelCase */
+    user_name = "John",
+    Product_ID = 123,
+    MY_CONSTANT = "test"
+)`,
+        nonOptimalNodeAccess: `block(
+    /* Hierarchy / Library Item node references in expressions */
+    value = ParentSeason.Name,
+    color = ColorSpecification.Code,
+    size = ProductSize.Value
+)`,
+        nullAccessProtection: `block(
+    /* Property access without null checks */
     userName = user.name,
     itemCode = product.code,
-    totalPrice = order.total,
-    customerCity = customer.address.city,
-    productCategory = item.category.name
-)
-
-/* Rule 7: Math Operations Parens - Complex math without parentheses for clarity */
-block(
-    complexCalc1 = a + b * c,
-    complexCalc2 = x - y / z,
-    mixedOps = price + discount * quantity,
-    result = value1 + value2 * value3 - value4
-)
-
-/* Rule 8: Extraneous Blocks - Unnecessary block() wrapper for single statement */
-block(
-    singleStatement = simpleValue
+    totalPrice = order.total
+)`,
+        mathOperationsParens: `block(
+    /* Complex math without parentheses */
+    result = a + b * c,
+    value = x - y / z
+)`,
+        extraneousBlocks: `block(
+    /* Unnecessary block() for single statement */
+    result = value
 )
 
 block()
+{}`
+    };
 
-{}
+    // Aggregate all examples in order
+    var ruleOrder = ['divisionOperations', 'queryFunctions', 'uniqueKey', 'variableNaming',
+                     'nonOptimalNodeAccess', 'nullAccessProtection', 'mathOperationsParens', 'extraneousBlocks'];
 
-/* End of comprehensive example */`;
+    var allExamples = '/* ========================================\n';
+    allExamples += ' * ALL RULE EXAMPLES - AGGREGATED\n';
+    allExamples += ' * Each rule example in separate block()\n';
+    allExamples += ' * ======================================== */\n\n';
 
-    // Set the example in the input
-    document.getElementById('suggestionInput').value = comprehensiveExample;
+    for (var i = 0; i < ruleOrder.length; i++) {
+        var ruleName = ruleOrder[i];
+        var example = ruleExamples[ruleName];
 
-    // Visual feedback
-    var inputElement = document.getElementById('suggestionInput');
-    var originalBg = inputElement.style.backgroundColor;
-    inputElement.style.backgroundColor = '#e8f5e8';
+        // Add rule number and name as comment
+        allExamples += '/* Rule ' + (i + 1) + ': ' + ruleName + ' */\n';
+        allExamples += example;
 
-    setTimeout(function() {
-        inputElement.style.backgroundColor = originalBg;
-        // Auto-run suggestions
-        getSuggestions();
-    }, 300);
+        // Add spacing between rules
+        if (i < ruleOrder.length - 1) {
+            allExamples += '\n\n';
+        }
+    }
+
+    // Copy to clipboard
+    var tempTextarea = document.createElement('textarea');
+    tempTextarea.value = allExamples;
+    tempTextarea.style.position = 'fixed';
+    tempTextarea.style.opacity = '0';
+    document.body.appendChild(tempTextarea);
+    tempTextarea.select();
+
+    try {
+        document.execCommand('copy');
+
+        // Visual feedback - change button
+        var buttons = document.querySelectorAll('button');
+        for (var i = 0; i < buttons.length; i++) {
+            if (buttons[i].textContent.includes('Copy All Examples')) {
+                var btn = buttons[i];
+                var originalText = btn.innerHTML;
+                btn.innerHTML = '✅ Copied! Close and paste into input area';
+                btn.style.background = '#218838';
+
+                setTimeout(function() {
+                    btn.innerHTML = originalText;
+                    btn.style.background = '#28a745';
+                }, 2000);
+                break;
+            }
+        }
+    } catch (err) {
+        alert('Failed to copy examples');
+    }
+
+    document.body.removeChild(tempTextarea);
 }
 
 // Clear the suggestion input and outputs
@@ -810,8 +828,8 @@ if (typeof window !== 'undefined') {
     window.demonstrateNullProtection = demonstrateNullProtection;
     window.demonstrateMathOperations = demonstrateMathOperations;
 
-    // Comprehensive example
-    window.loadComprehensiveExample = loadComprehensiveExample;
+    // Copy all examples
+    window.copyAllExamples = copyAllExamples;
 
     console.log('[App v2.12] Functions exposed to global scope - persistent form selection enabled');
 }
