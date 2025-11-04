@@ -31,7 +31,7 @@
  */
 
 var APP_VERSION = {
-    version: 'v3.52',
+    version: 'v3.53',
     lastUpdated: '2025-11-04',
     description: 'DSL Suggestions App',
 

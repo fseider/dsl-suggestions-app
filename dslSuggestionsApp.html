@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.52
+ * VERSION: v3.53
  * LAST UPDATED: 2025-11-04
  *
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -23,6 +23,12 @@
  * - All cache-busting parameters must be updated to match
  * - See VERSION-BUMPING.md for complete documentation
  *
+ * v3.53 FIX - COPY ALL EXAMPLES COMMA SYNTAX:
+ * - Fixed "Copy All Examples" to add commas after each block() except the last
+ * - Proper DSL syntax: block(...), block(...), block(...)
+ * - Each inner block now properly separated by commas
+ * - Last block has no trailing comma (correct syntax)
+ *
  * v3.52 ARCHITECTURE - CENTRALIZED VERSION MANAGEMENT:
  * - Created appVersion.js as single source of truth for version
  *   - Exports APP_VERSION global object with version and helper methods
@@ -30,7 +36,7 @@
  *   - Eliminates hardcoded version numbers in HTML
  * - Updated HTML to display version from APP_VERSION.getVersion()
  * - Created VERSION-BUMPING.md with complete version management documentation
- * - Updated all cache-busting parameters to v=3.52
+ * - Updated all cache-busting parameters to v=3.53
  *   - dslSuggestionsApp.html: all <script> tags
  *   - dslSuggestionsEngine.js: all dynamic script loads
  * - Fixed "Copy All Examples" to close dialog and use proper indentation
@@ -654,7 +660,7 @@
     -->
 
     <!-- Load version first - this is the single source of truth for app version -->
-    <script src="appVersion.js?v=3.52&t=1762264000"></script>
+    <script src="appVersion.js?v=3.53&t=1762264000"></script>
     <script>
         // Display version immediately after loading
         if (typeof APP_VERSION !== 'undefined') {
@@ -662,9 +668,9 @@
         }
     </script>
 
-    <script src="dslSuggestionsEngine.js?v=3.52&t=1762264000" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
-    <script src="dslExamples.js?v=3.52&t=1762264000" onerror="handleScriptError('dslExamples.js')"></script>
-    <script src="dslSuggestionsApp.js?v=3.52&t=1762264000"></script>
+    <script src="dslSuggestionsEngine.js?v=3.53&t=1762264000" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
+    <script src="dslExamples.js?v=3.53&t=1762264000" onerror="handleScriptError('dslExamples.js')"></script>
+    <script src="dslSuggestionsApp.js?v=3.53&t=1762264000"></script>
 
     <style>
         /* v3.00 - Simplified styles, removed all popup-related CSS */

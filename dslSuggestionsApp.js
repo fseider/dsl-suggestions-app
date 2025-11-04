@@ -569,6 +569,11 @@ function copyAllExamples() {
             }
         }
 
+        // Add comma after block (except for last one)
+        if (i < ruleOrder.length - 1) {
+            allExamples += ',';
+        }
+
         // Add blank line after each example (except the last one)
         if (i < ruleOrder.length - 1) {
             allExamples += '\n';
