@@ -1,6 +1,6 @@
 <!--
  * FILE: dslSuggestionsApp.html
- * VERSION: v3.51
+ * VERSION: v3.52
  * LAST UPDATED: 2025-11-04
  *
  * ARTIFACT INFO (for proper Claude artifact creation):
@@ -17,10 +17,24 @@
  * Self-contained suggestions app separate from main application.
  *
  * VERSION TRACKING STRATEGY:
- * - This file (dslSuggestionsApp.html) is the MASTER version for the entire app
- * - Any change to ANY file bumps this version
- * - Engine (dslSuggestionsEngine.js) and Rules (dslRules.js) maintain separate versions for debugging
- * - All other files reference this master version
+ * - NEW: appVersion.js is the single source of truth for version number
+ * - App reads version from APP_VERSION global object
+ * - Any change to ANY file MUST bump version in appVersion.js
+ * - All cache-busting parameters must be updated to match
+ * - See VERSION-BUMPING.md for complete documentation
+ *
+ * v3.52 ARCHITECTURE - CENTRALIZED VERSION MANAGEMENT:
+ * - Created appVersion.js as single source of truth for version
+ *   - Exports APP_VERSION global object with version and helper methods
+ *   - HTML loads this first and displays version dynamically
+ *   - Eliminates hardcoded version numbers in HTML
+ * - Updated HTML to display version from APP_VERSION.getVersion()
+ * - Created VERSION-BUMPING.md with complete version management documentation
+ * - Updated all cache-busting parameters to v=3.52
+ *   - dslSuggestionsApp.html: all <script> tags
+ *   - dslSuggestionsEngine.js: all dynamic script loads
+ * - Fixed "Copy All Examples" to close dialog and use proper indentation
+ * - Architecture now loads: appVersion.js → engine → examples → app (5 files)
  *
  * v3.51 UPDATE - EXTRANEOUS BLOCKS FIX AND EXAMPLES REFACTORING:
  * - Fixed extraneousBlocks rule (dslRules.js v1.02) to detect unnecessary block() wrappers
@@ -593,7 +607,7 @@
         <h1>DSL Suggestions App</h1>
         <p class="subtitle">Standalone Suggestions Application</p>
         <p class="version-info" style="font-size: 0.9em; color: #666; margin-top: 5px;">
-            Version: v3.51
+            Version: <span id="appVersion">Loading...</span>
         </p>
         
         <label for="suggestionInput">Enter DSL Code to Analyze:</label>
@@ -631,16 +645,26 @@
 
     <!--
     ⚠️ OPTIMIZED ARCHITECTURE v3.00:
-    - HTML files only load ENGINE (dslSuggestionsEngine.js) and APP (dslSuggestionsApp.js)
+    - HTML files load VERSION (appVersion.js) first for cache-busting
+    - Then loads ENGINE (dslSuggestionsEngine.js) and APP (dslSuggestionsApp.js)
     - Engine auto-loads: Config, Utilities, and Consolidated Rules (3 files total)
     - No more dynamic loading, registry, or individual rule files
-    - Faster page load: 4 HTTP requests instead of 10+
+    - Faster page load: 5 HTTP requests instead of 10+
     - Examples loaded from separate dslExamples.js for easy editing
     -->
 
-    <script src="dslSuggestionsEngine.js?v=3.51&t=1762264000" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
-    <script src="dslExamples.js?v=3.51&t=1762264000" onerror="handleScriptError('dslExamples.js')"></script>
-    <script src="dslSuggestionsApp.js?v=3.51&t=1762264000"></script>
+    <!-- Load version first - this is the single source of truth for app version -->
+    <script src="appVersion.js?v=3.52&t=1762264000"></script>
+    <script>
+        // Display version immediately after loading
+        if (typeof APP_VERSION !== 'undefined') {
+            document.getElementById('appVersion').textContent = APP_VERSION.getVersion();
+        }
+    </script>
+
+    <script src="dslSuggestionsEngine.js?v=3.52&t=1762264000" onerror="handleScriptError('dslSuggestionsEngine.js')"></script>
+    <script src="dslExamples.js?v=3.52&t=1762264000" onerror="handleScriptError('dslExamples.js')"></script>
+    <script src="dslSuggestionsApp.js?v=3.52&t=1762264000"></script>
 
     <style>
         /* v3.00 - Simplified styles, removed all popup-related CSS */
